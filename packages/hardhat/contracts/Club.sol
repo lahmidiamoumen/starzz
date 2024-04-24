@@ -1,79 +1,63 @@
 // SPDX-License-Identifier: MIT 
-pragma solidity ^0.8.0;
+pragma solidity >=0.8.0 <0.9.0;
 
-import "./AccessControl.sol";
-import "./Proposal.sol";
-import "./UserManagement.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "./Roles.sol";
 
-contract Club {
-    uint256 id;
-    string name;
-    address creator;
-    AccessControl private _accessControl;
+contract Club is Roles {
+    using Counters for Counters.Counter;
 
-    mapping(address => bool) private _membershipRequests;
-    mapping(address => bool) private _members;
+    Counters.Counter private _clubIds;
+    mapping(uint256 => address) public moderators;
+    mapping(address => uint256) public clubsByModerator; // Maps moderator to club ID
+    mapping(address => bool) public members; // Maps user address to club membership
 
-    event MembershipRequested(address indexed user);
-    event MembershipApproved(address indexed user);
-    event MembershipRejected(address indexed user);
-    event ClubLeft(address indexed user);
-
-
-    constructor(address accessControlAddress, uint256 clubId, string memory clubName) {
-        _accessControl = AccessControl(accessControlAddress);
-        id = clubId;
-        name = clubName;
-        creator = msg.sender;
+    struct ClubDetails {
+        uint256 id;
+        string name;
+        address creator;
     }
 
-    modifier onlyMember() {
-        require(_members[msg.sender], "Club: caller is not a member");
-        _;
+    mapping(uint256 => ClubDetails) public clubDetails;
+    event ClubCreated(uint256 clubId, string name, address moderator);
+    event JoinedClub(address user, uint256 clubId);
+    event LeftClub(address user, uint256 clubId);
+
+    constructor() {} // Inherit Roles constructor
+
+    function createClub(string memory name) public onlyModerator {
+        uint256 clubId = _clubIds.current();
+        _clubIds.increment();
+        moderators[clubId] = msg.sender;
+        clubsByModerator[msg.sender] = clubId;
+        clubDetails[clubId] = ClubDetails(clubId, name, msg.sender);
+        emit ClubCreated(clubId, name, msg.sender);
     }
 
-    modifier onlyModerator() {
-        require(_accessControl.hasRole(AccessControl.Role.Moderator), "Proposal: caller must be a Moderator");
-        _;
+    function getClubDetails(uint256 clubId) public view returns (ClubDetails memory) {
+        require(clubId <= _clubIds.current(), "Invalid club ID");
+        return clubDetails[clubId];
     }
 
-    modifier onlyFans() {
-        require(_accessControl.hasRole(AccessControl.Role.Fan), "Proposal: caller must be a Fan");
-        _;
+    function joinClub(uint256 clubId) public {
+        require(!members[msg.sender], "Already a member of this club");
+        members[msg.sender] = true;
+        emit JoinedClub(msg.sender, clubId);
     }
 
-    function requestMembership() external onlyFans {
-        require(!_members[msg.sender], "User already a member");
-        require(!_membershipRequests[msg.sender], "Membership request already submitted");
-
-        _membershipRequests[msg.sender] = true;
-        emit MembershipRequested(msg.sender);
+    function leaveClub(uint256 clubId) public {
+        require(members[msg.sender], "Not a member of this club");
+        members[msg.sender] = false;
+        emit LeftClub(msg.sender, clubId);
     }
 
-    function approveMembership(address user) external onlyModerator {
-        require(!_members[msg.sender], "User already a member");
-        require(_membershipRequests[user], "User has not requested membership");
-        _membershipRequests[user] = false;
-        _members[user] = true;
-        emit MembershipApproved(user);
+    function getClubModerator(uint256 clubId) public view returns (address) {
+        require(clubId <= _clubIds.current(), "Invalid club ID");
+        return moderators[clubId];
     }
 
-    function rejectMembership(address user) external onlyModerator {
-        require(_membershipRequests[user], "User has not requested membership");
-        _membershipRequests[user] = false;
-        emit MembershipRejected(user);
-    }
-
-    function leaveClub() external onlyMember {
-        _members[msg.sender] = false;
-        emit ClubLeft(msg.sender);
-    }
-
-    function isMember(address user) external view returns (bool) {
-        return _members[user];
-    }
-
-    function hasRequestedMembership(address user) external view returns (bool) {
-        return _membershipRequests[user];
+    function isMember(address user, uint256 clubId) public view returns (bool) {
+        require(clubId <= _clubIds.current(), "Invalid club ID");
+        return members[user];
     }
 }
