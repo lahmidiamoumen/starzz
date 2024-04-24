@@ -3,10 +3,13 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "./Roles.sol";
 import "./Club.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract Proposal is Roles {
+    using Counters for Counters.Counter;
     enum Status { Pending, Active, Passed, Rejected }
 
+    Counters.Counter private _proposalIds;
 
     struct Choice {
         string description;
@@ -27,7 +30,6 @@ contract Proposal is Roles {
 
     mapping(address => mapping (uint256 => bool)) hasVoted;
     ProposalDetails[] public proposals;
-    uint256 public nextProposalId; // Counter for proposal IDs
 
     event ProposalCreated(uint256 id, uint256 clubId, address creator);
     event VotingStarted(uint256 proposalId, uint256 startTime, uint256 endTime);
@@ -36,7 +38,6 @@ contract Proposal is Roles {
 
 
     constructor() {
-        nextProposalId = 0;
     } // Inherit Roles constructor
 
     function createProposal(
@@ -48,23 +49,26 @@ contract Proposal is Roles {
         require(Club(address(this)).getClubModerator(clubId) == msg.sender, "Not a moderator of this club");
         require(_choices.length > 0 && _choices.length <= 10, "Invalid number of choices");
 
-        proposals[nextProposalId].id = nextProposalId;
-        proposals[nextProposalId].clubId = clubId;
-        proposals[nextProposalId].creator = msg.sender;
-        proposals[nextProposalId].title = _title;
-        proposals[nextProposalId].description = _description;
+        uint256 proposalIds = _proposalIds.current();
+
+        proposals[proposalIds].id = proposalIds;
+        proposals[proposalIds].clubId = clubId;
+        proposals[proposalIds].creator = msg.sender;
+        proposals[proposalIds].title = _title;
+        proposals[proposalIds].description = _description;
 
         // Convert string choices to Choice struct
         for (uint256 i = 0; i < _choices.length; i++) {
-            proposals[nextProposalId].choices.push(Choice(_choices[i], 0));
+            proposals[proposalIds].choices.push(Choice(_choices[i], 0));
         }
 
-        proposals[nextProposalId].status = Status.Pending;
-        nextProposalId++;
+        proposals[proposalIds].status = Status.Pending;
+
+        _proposalIds.increment();
         emit ProposalCreated(
-            proposals[nextProposalId].id,
-            proposals[nextProposalId].clubId,
-            proposals[nextProposalId].creator);
+            proposals[proposalIds].id,
+            proposals[proposalIds].clubId,
+            proposals[proposalIds].creator);
     }
 
     function isActive(ProposalDetails storage proposal) internal view returns (bool) {
