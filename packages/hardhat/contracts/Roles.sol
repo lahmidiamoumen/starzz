@@ -11,8 +11,11 @@ contract Roles is AccessControl {
     event ModeratorRoleGranted(address indexed account);
     event ModeratorRoleRevoked(address indexed account);
 
-    constructor() {
-        _setupRole(ADMIN_ROLE, msg.sender);
+    constructor(address owner) {
+        _setRoleAdmin(ADMIN_ROLE, ADMIN_ROLE);
+        _setRoleAdmin(MODERATOR_ROLE, ADMIN_ROLE);
+        _setRoleAdmin(FAN_ROLE, ADMIN_ROLE);
+        _setupRole(ADMIN_ROLE, owner);
     }
 
     modifier onlyAdmin() {
@@ -26,7 +29,7 @@ contract Roles is AccessControl {
     }
 
     modifier onlyModerator() {
-        require(hasRole(MODERATOR_ROLE, msg.sender) && isModerator(msg.sender), "Roles: caller is not a moderator for this club");
+        require(hasRole(MODERATOR_ROLE, msg.sender), "Roles: caller is not a moderator for this club");
         _;
     }
 
@@ -41,6 +44,12 @@ contract Roles is AccessControl {
         emit ModeratorRoleGranted(account);
     }
 
+    function grantAdminRole(address account) public onlyAdmin {
+        require(!hasRole(ADMIN_ROLE, account), "User is already an admin");
+        grantRole(ADMIN_ROLE, account);
+        emit ModeratorRoleGranted(account);
+    }
+
     function revokeModeratorRole(address account) public onlyAdmin {
         require(hasRole(MODERATOR_ROLE, account), "User is not a moderator");
         revokeRole(MODERATOR_ROLE, account);
@@ -49,6 +58,14 @@ contract Roles is AccessControl {
 
     function isModerator(address account) public view returns (bool) {
         return hasRole(MODERATOR_ROLE, account);
+    }
+
+    function isAdmin(address account) public view returns (bool) {
+        return hasRole(ADMIN_ROLE, account);
+    }
+
+    function isFan(address account) public view returns (bool) {
+        return hasRole(FAN_ROLE, account);
     }
 
 }

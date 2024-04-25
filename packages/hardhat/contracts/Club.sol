@@ -23,9 +23,9 @@ contract Club is Roles {
     event JoinedClub(address user, uint256 clubId);
     event LeftClub(address user, uint256 clubId);
 
-    constructor() {} // Inherit Roles constructor
+    constructor(address owner) Roles(owner) {} // Inherit Roles constructor
 
-    function createClub(string memory name) public onlyModerator {
+    function createClub(string memory name) public onlyAdminOrModerator {
         uint256 clubId = _clubIds.current();
         _clubIds.increment();
         moderators[clubId] = msg.sender;
