@@ -7,13 +7,13 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     Club: {
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      address: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc",
       abi: [
         {
           inputs: [
             {
               internalType: "address",
-              name: "owner",
+              name: "rolesContract",
               type: "address",
             },
           ],
@@ -89,11 +89,17 @@ const deployedContracts = {
             {
               indexed: true,
               internalType: "address",
-              name: "account",
+              name: "user",
               type: "address",
             },
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
+            },
           ],
-          name: "ModeratorRoleGranted",
+          name: "MembershipApproved",
           type: "event",
         },
         {
@@ -102,11 +108,17 @@ const deployedContracts = {
             {
               indexed: true,
               internalType: "address",
-              name: "account",
+              name: "user",
               type: "address",
             },
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
+            },
           ],
-          name: "ModeratorRoleRevoked",
+          name: "MembershipRejected",
           type: "event",
         },
         {
@@ -114,127 +126,19 @@ const deployedContracts = {
           inputs: [
             {
               indexed: true,
-              internalType: "bytes32",
-              name: "role",
-              type: "bytes32",
+              internalType: "address",
+              name: "user",
+              type: "address",
             },
             {
               indexed: true,
-              internalType: "bytes32",
-              name: "previousAdminRole",
-              type: "bytes32",
-            },
-            {
-              indexed: true,
-              internalType: "bytes32",
-              name: "newAdminRole",
-              type: "bytes32",
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
             },
           ],
-          name: "RoleAdminChanged",
+          name: "MembershipRequested",
           type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "bytes32",
-              name: "role",
-              type: "bytes32",
-            },
-            {
-              indexed: true,
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-            {
-              indexed: true,
-              internalType: "address",
-              name: "sender",
-              type: "address",
-            },
-          ],
-          name: "RoleGranted",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "bytes32",
-              name: "role",
-              type: "bytes32",
-            },
-            {
-              indexed: true,
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-            {
-              indexed: true,
-              internalType: "address",
-              name: "sender",
-              type: "address",
-            },
-          ],
-          name: "RoleRevoked",
-          type: "event",
-        },
-        {
-          inputs: [],
-          name: "ADMIN_ROLE",
-          outputs: [
-            {
-              internalType: "bytes32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "DEFAULT_ADMIN_ROLE",
-          outputs: [
-            {
-              internalType: "bytes32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "FAN_ROLE",
-          outputs: [
-            {
-              internalType: "bytes32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "MODERATOR_ROLE",
-          outputs: [
-            {
-              internalType: "bytes32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
         },
         {
           inputs: [
@@ -244,7 +148,7 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
-          name: "clubDetails",
+          name: "_clubDetails",
           outputs: [
             {
               internalType: "uint256",
@@ -266,22 +170,34 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [
+          inputs: [],
+          name: "_roles",
+          outputs: [
             {
               internalType: "address",
               name: "",
               type: "address",
             },
           ],
-          name: "clubsByModerator",
-          outputs: [
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
             {
               internalType: "uint256",
-              name: "",
+              name: "clubId",
               type: "uint256",
             },
           ],
-          stateMutability: "view",
+          name: "approveMembership",
+          outputs: [],
+          stateMutability: "nonpayable",
           type: "function",
         },
         {
@@ -295,6 +211,44 @@ const deployedContracts = {
           name: "createClub",
           outputs: [],
           stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "csToClub",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
+            },
+          ],
+          name: "getClubCreator",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
           type: "function",
         },
         {
@@ -341,94 +295,7 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
-          name: "getClubModerator",
-          outputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "bytes32",
-              name: "role",
-              type: "bytes32",
-            },
-          ],
-          name: "getRoleAdmin",
-          outputs: [
-            {
-              internalType: "bytes32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "grantAdminRole",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "grantModeratorRole",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "bytes32",
-              name: "role",
-              type: "bytes32",
-            },
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "grantRole",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "bytes32",
-              name: "role",
-              type: "bytes32",
-            },
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "hasRole",
+          name: "hasRequestedMembership",
           outputs: [
             {
               internalType: "bool",
@@ -443,30 +310,16 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "address",
-              name: "account",
+              name: "user",
               type: "address",
             },
-          ],
-          name: "isAdmin",
-          outputs: [
             {
-              internalType: "bool",
-              name: "",
-              type: "bool",
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
             },
           ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "isFan",
+          name: "hasRequestedMembership",
           outputs: [
             {
               internalType: "bool",
@@ -491,25 +344,6 @@ const deployedContracts = {
             },
           ],
           name: "isMember",
-          outputs: [
-            {
-              internalType: "bool",
-              name: "",
-              type: "bool",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "isModerator",
           outputs: [
             {
               internalType: "bool",
@@ -550,54 +384,16 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "address",
-              name: "",
+              name: "user",
               type: "address",
             },
-          ],
-          name: "members",
-          outputs: [
-            {
-              internalType: "bool",
-              name: "",
-              type: "bool",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
             {
               internalType: "uint256",
-              name: "",
+              name: "clubId",
               type: "uint256",
             },
           ],
-          name: "moderators",
-          outputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "bytes32",
-              name: "role",
-              type: "bytes32",
-            },
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "renounceRole",
+          name: "rejectMembership",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
@@ -606,111 +402,36 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "address",
-              name: "account",
+              name: "user",
               type: "address",
             },
+            {
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
+            },
           ],
-          name: "revokeModeratorRole",
+          name: "revokMembership",
           outputs: [],
           stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "bytes32",
-              name: "role",
-              type: "bytes32",
-            },
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "revokeRole",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "bytes4",
-              name: "interfaceId",
-              type: "bytes4",
-            },
-          ],
-          name: "supportsInterface",
-          outputs: [
-            {
-              internalType: "bool",
-              name: "",
-              type: "bool",
-            },
-          ],
-          stateMutability: "view",
           type: "function",
         },
       ],
-      inheritedFunctions: {
-        ADMIN_ROLE: "contracts/Roles.sol",
-        DEFAULT_ADMIN_ROLE: "contracts/Roles.sol",
-        FAN_ROLE: "contracts/Roles.sol",
-        MODERATOR_ROLE: "contracts/Roles.sol",
-        getRoleAdmin: "contracts/Roles.sol",
-        grantAdminRole: "contracts/Roles.sol",
-        grantModeratorRole: "contracts/Roles.sol",
-        grantRole: "contracts/Roles.sol",
-        hasRole: "contracts/Roles.sol",
-        isAdmin: "contracts/Roles.sol",
-        isFan: "contracts/Roles.sol",
-        isModerator: "contracts/Roles.sol",
-        renounceRole: "contracts/Roles.sol",
-        revokeModeratorRole: "contracts/Roles.sol",
-        revokeRole: "contracts/Roles.sol",
-        supportsInterface: "contracts/Roles.sol",
-      },
+      inheritedFunctions: {},
     },
     Proposal: {
-      address: "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
+      address: "0x1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f",
       abi: [
         {
           inputs: [
             {
               internalType: "address",
-              name: "owner",
+              name: "rolesContract",
               type: "address",
             },
           ],
           stateMutability: "nonpayable",
           type: "constructor",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "ModeratorRoleGranted",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "ModeratorRoleRevoked",
-          type: "event",
         },
         {
           anonymous: false,
@@ -766,81 +487,6 @@ const deployedContracts = {
           anonymous: false,
           inputs: [
             {
-              indexed: true,
-              internalType: "bytes32",
-              name: "role",
-              type: "bytes32",
-            },
-            {
-              indexed: true,
-              internalType: "bytes32",
-              name: "previousAdminRole",
-              type: "bytes32",
-            },
-            {
-              indexed: true,
-              internalType: "bytes32",
-              name: "newAdminRole",
-              type: "bytes32",
-            },
-          ],
-          name: "RoleAdminChanged",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "bytes32",
-              name: "role",
-              type: "bytes32",
-            },
-            {
-              indexed: true,
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-            {
-              indexed: true,
-              internalType: "address",
-              name: "sender",
-              type: "address",
-            },
-          ],
-          name: "RoleGranted",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "bytes32",
-              name: "role",
-              type: "bytes32",
-            },
-            {
-              indexed: true,
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-            {
-              indexed: true,
-              internalType: "address",
-              name: "sender",
-              type: "address",
-            },
-          ],
-          name: "RoleRevoked",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
               indexed: false,
               internalType: "uint256",
               name: "proposalId",
@@ -889,51 +535,12 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "ADMIN_ROLE",
+          name: "_roles",
           outputs: [
             {
-              internalType: "bytes32",
+              internalType: "address",
               name: "",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "DEFAULT_ADMIN_ROLE",
-          outputs: [
-            {
-              internalType: "bytes32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "FAN_ROLE",
-          outputs: [
-            {
-              internalType: "bytes32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "MODERATOR_ROLE",
-          outputs: [
-            {
-              internalType: "bytes32",
-              name: "",
-              type: "bytes32",
+              type: "address",
             },
           ],
           stateMutability: "view",
@@ -1347,253 +954,6 @@ const deployedContracts = {
         {
           inputs: [
             {
-              internalType: "bytes32",
-              name: "role",
-              type: "bytes32",
-            },
-          ],
-          name: "getRoleAdmin",
-          outputs: [
-            {
-              internalType: "bytes32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "grantAdminRole",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "grantModeratorRole",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "bytes32",
-              name: "role",
-              type: "bytes32",
-            },
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "grantRole",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "bytes32",
-              name: "role",
-              type: "bytes32",
-            },
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "hasRole",
-          outputs: [
-            {
-              internalType: "bool",
-              name: "",
-              type: "bool",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "isAdmin",
-          outputs: [
-            {
-              internalType: "bool",
-              name: "",
-              type: "bool",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "isFan",
-          outputs: [
-            {
-              internalType: "bool",
-              name: "",
-              type: "bool",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "isModerator",
-          outputs: [
-            {
-              internalType: "bool",
-              name: "",
-              type: "bool",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          name: "proposals",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "id",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "clubId",
-              type: "uint256",
-            },
-            {
-              internalType: "address",
-              name: "creator",
-              type: "address",
-            },
-            {
-              internalType: "string",
-              name: "title",
-              type: "string",
-            },
-            {
-              internalType: "string",
-              name: "description",
-              type: "string",
-            },
-            {
-              internalType: "enum Proposal.Status",
-              name: "status",
-              type: "uint8",
-            },
-            {
-              internalType: "uint256",
-              name: "votingStartTime",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "votingEndTime",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "bytes32",
-              name: "role",
-              type: "bytes32",
-            },
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "renounceRole",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "revokeModeratorRole",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "bytes32",
-              name: "role",
-              type: "bytes32",
-            },
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "revokeRole",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
               internalType: "uint256",
               name: "proposalId",
               type: "uint256",
@@ -1635,25 +995,6 @@ const deployedContracts = {
         {
           inputs: [
             {
-              internalType: "bytes4",
-              name: "interfaceId",
-              type: "bytes4",
-            },
-          ],
-          name: "supportsInterface",
-          outputs: [
-            {
-              internalType: "bool",
-              name: "",
-              type: "bool",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
               internalType: "uint256",
               name: "proposalId",
               type: "uint256",
@@ -1675,38 +1016,73 @@ const deployedContracts = {
           type: "function",
         },
       ],
-      inheritedFunctions: {
-        ADMIN_ROLE: "contracts/Roles.sol",
-        DEFAULT_ADMIN_ROLE: "contracts/Roles.sol",
-        FAN_ROLE: "contracts/Roles.sol",
-        MODERATOR_ROLE: "contracts/Roles.sol",
-        getRoleAdmin: "contracts/Roles.sol",
-        grantAdminRole: "contracts/Roles.sol",
-        grantModeratorRole: "contracts/Roles.sol",
-        grantRole: "contracts/Roles.sol",
-        hasRole: "contracts/Roles.sol",
-        isAdmin: "contracts/Roles.sol",
-        isFan: "contracts/Roles.sol",
-        isModerator: "contracts/Roles.sol",
-        renounceRole: "contracts/Roles.sol",
-        revokeModeratorRole: "contracts/Roles.sol",
-        revokeRole: "contracts/Roles.sol",
-        supportsInterface: "contracts/Roles.sol",
-      },
+      inheritedFunctions: {},
     },
     Roles: {
-      address: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+      address: "0x7969c5eD335650692Bc04293B07F5BF2e7A673C0",
       abi: [
         {
           inputs: [
             {
               internalType: "address",
-              name: "owner",
+              name: "_owner",
               type: "address",
             },
           ],
           stateMutability: "nonpayable",
           type: "constructor",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "AdminRoleGranted",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "AdminRoleRevoked",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "CSRoleGranted",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "CSRoleRevoked",
+          type: "event",
         },
         {
           anonymous: false,
@@ -1811,46 +1187,7 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "ADMIN_ROLE",
-          outputs: [
-            {
-              internalType: "bytes32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
           name: "DEFAULT_ADMIN_ROLE",
-          outputs: [
-            {
-              internalType: "bytes32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "FAN_ROLE",
-          outputs: [
-            {
-              internalType: "bytes32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "MODERATOR_ROLE",
           outputs: [
             {
               internalType: "bytes32",
@@ -1889,6 +1226,19 @@ const deployedContracts = {
             },
           ],
           name: "grantAdminRole",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "grantCSRole",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
@@ -1975,6 +1325,44 @@ const deployedContracts = {
               type: "address",
             },
           ],
+          name: "isAdminOrModerator",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "isCS",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
           name: "isFan",
           outputs: [
             {
@@ -2008,6 +1396,25 @@ const deployedContracts = {
         {
           inputs: [
             {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "isStaff",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
               internalType: "bytes32",
               name: "role",
               type: "bytes32",
@@ -2019,6 +1426,32 @@ const deployedContracts = {
             },
           ],
           name: "renounceRole",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "revokeAdminRole",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "revokeCSRole",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
@@ -2075,6 +1508,12 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {
+        isAdmin: "contracts/IRoles.sol",
+        isAdminOrModerator: "contracts/IRoles.sol",
+        isCS: "contracts/IRoles.sol",
+        isFan: "contracts/IRoles.sol",
+        isModerator: "contracts/IRoles.sol",
+        isStaff: "contracts/IRoles.sol",
         DEFAULT_ADMIN_ROLE: "@openzeppelin/contracts/access/AccessControl.sol",
         getRoleAdmin: "@openzeppelin/contracts/access/AccessControl.sol",
         grantRole: "@openzeppelin/contracts/access/AccessControl.sol",
