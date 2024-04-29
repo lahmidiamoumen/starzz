@@ -25,8 +25,6 @@ contract Roles is IRoles, AccessControl {
 		_setRoleAdmin(ADMIN_ROLE, ADMIN_ROLE);
 		_setRoleAdmin(MODERATOR_ROLE, ADMIN_ROLE);
 		_setRoleAdmin(FAN_ROLE, ADMIN_ROLE);
-		_setRoleAdmin(CS_ROLE, ADMIN_ROLE);
-		_setRoleAdmin(FAN_ROLE, MODERATOR_ROLE);
 		_setRoleAdmin(CS_ROLE, MODERATOR_ROLE);
 		_setRoleAdmin(FAN_ROLE, CS_ROLE);
 

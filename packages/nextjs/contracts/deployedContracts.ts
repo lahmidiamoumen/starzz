@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     Club: {
-      address: "0x4C4a2f8c81640e47606d3fd77B353E87Ba015584",
+      address: "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2",
       abi: [
         {
           inputs: [
@@ -163,19 +163,6 @@ const deployedContracts = {
             {
               internalType: "address",
               name: "creator",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "_roles",
-          outputs: [
-            {
-              internalType: "address",
-              name: "",
               type: "address",
             },
           ],
@@ -422,7 +409,7 @@ const deployedContracts = {
       },
     },
     Proposal: {
-      address: "0x21dF544947ba3E8b3c32561399E88B52Dc8b2823",
+      address: "0x2B0d36FACD61B71CC05ab8F3D2355ec3631C0dd5",
       abi: [
         {
           inputs: [
@@ -541,32 +528,6 @@ const deployedContracts = {
           type: "event",
         },
         {
-          inputs: [],
-          name: "_clubs",
-          outputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "_roles",
-          outputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
           inputs: [
             {
               internalType: "address",
@@ -598,19 +559,19 @@ const deployedContracts = {
               type: "uint256",
             },
             {
-              internalType: "bytes32",
+              internalType: "string",
               name: "_title",
-              type: "bytes32",
+              type: "string",
             },
             {
-              internalType: "bytes32",
+              internalType: "string",
               name: "_description",
-              type: "bytes32",
+              type: "string",
             },
             {
-              internalType: "bytes32[]",
+              internalType: "string[]",
               name: "_choicesContent",
-              type: "bytes32[]",
+              type: "string[]",
             },
           ],
           name: "createProposal",
@@ -672,21 +633,21 @@ const deployedContracts = {
                   type: "address",
                 },
                 {
-                  internalType: "bytes32",
+                  internalType: "string",
                   name: "title",
-                  type: "bytes32",
+                  type: "string",
                 },
                 {
-                  internalType: "bytes32",
+                  internalType: "string",
                   name: "description",
-                  type: "bytes32",
+                  type: "string",
                 },
                 {
                   components: [
                     {
-                      internalType: "bytes32",
+                      internalType: "string",
                       name: "description",
-                      type: "bytes32",
+                      type: "string",
                     },
                     {
                       internalType: "uint8",
@@ -726,6 +687,89 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "uint256",
+              name: "page",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "pageSize",
+              type: "uint256",
+            },
+          ],
+          name: "getProposals",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "id",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "clubId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "creator",
+                  type: "address",
+                },
+                {
+                  internalType: "string",
+                  name: "title",
+                  type: "string",
+                },
+                {
+                  internalType: "string",
+                  name: "description",
+                  type: "string",
+                },
+                {
+                  components: [
+                    {
+                      internalType: "string",
+                      name: "description",
+                      type: "string",
+                    },
+                    {
+                      internalType: "uint8",
+                      name: "votes",
+                      type: "uint8",
+                    },
+                  ],
+                  internalType: "struct Proposal.Choice[]",
+                  name: "choices",
+                  type: "tuple[]",
+                },
+                {
+                  internalType: "enum Proposal.Status",
+                  name: "status",
+                  type: "uint8",
+                },
+                {
+                  internalType: "uint256",
+                  name: "votingStartTime",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "votingEndTime",
+                  type: "uint256",
+                },
+              ],
+              internalType: "struct Proposal.ProposalDetails[]",
+              name: "",
+              type: "tuple[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
               name: "clubId",
               type: "uint256",
             },
@@ -750,21 +794,21 @@ const deployedContracts = {
                   type: "address",
                 },
                 {
-                  internalType: "bytes32",
+                  internalType: "string",
                   name: "title",
-                  type: "bytes32",
+                  type: "string",
                 },
                 {
-                  internalType: "bytes32",
+                  internalType: "string",
                   name: "description",
-                  type: "bytes32",
+                  type: "string",
                 },
                 {
                   components: [
                     {
-                      internalType: "bytes32",
+                      internalType: "string",
                       name: "description",
-                      type: "bytes32",
+                      type: "string",
                     },
                     {
                       internalType: "uint8",
@@ -828,21 +872,21 @@ const deployedContracts = {
                   type: "address",
                 },
                 {
-                  internalType: "bytes32",
+                  internalType: "string",
                   name: "title",
-                  type: "bytes32",
+                  type: "string",
                 },
                 {
-                  internalType: "bytes32",
+                  internalType: "string",
                   name: "description",
-                  type: "bytes32",
+                  type: "string",
                 },
                 {
                   components: [
                     {
-                      internalType: "bytes32",
+                      internalType: "string",
                       name: "description",
-                      type: "bytes32",
+                      type: "string",
                     },
                     {
                       internalType: "uint8",
@@ -916,21 +960,21 @@ const deployedContracts = {
                   type: "address",
                 },
                 {
-                  internalType: "bytes32",
+                  internalType: "string",
                   name: "title",
-                  type: "bytes32",
+                  type: "string",
                 },
                 {
-                  internalType: "bytes32",
+                  internalType: "string",
                   name: "description",
-                  type: "bytes32",
+                  type: "string",
                 },
                 {
                   components: [
                     {
-                      internalType: "bytes32",
+                      internalType: "string",
                       name: "description",
-                      type: "bytes32",
+                      type: "string",
                     },
                     {
                       internalType: "uint8",

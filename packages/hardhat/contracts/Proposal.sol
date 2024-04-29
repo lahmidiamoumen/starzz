@@ -21,16 +21,16 @@ contract Proposal {
 	Counters.Counter private _proposalIds;
 
 	struct Choice {
-		bytes32 description;
-		uint8  votes;
+		string description;
+		uint8 votes;
 	}
 
 	struct ProposalDetails {
 		uint256 id;
 		uint256 clubId;
 		address creator;
-		bytes32 title;
-		bytes32 description;
+		string title;
+		string description;
 		Choice[] choices;
 		Status status;
 		uint256 votingStartTime;
@@ -64,9 +64,9 @@ contract Proposal {
 
 	function createProposal(
 		uint256 clubId,
-		bytes32 _title,
-		bytes32 _description,
-		bytes32[] memory _choicesContent
+		string memory _title,
+		string memory _description,
+		string[] memory _choicesContent
 	) external onlyAdminOrModerator {
 		// require(IClub(_clubs).getClubModerator(clubId) == _msgSender(), "Not a moderator of this club");
 		require(
@@ -77,7 +77,7 @@ contract Proposal {
 		uint256 proposalIds = _proposalIds.current();
 		_proposalIds.increment();
 
-        ProposalDetails storage newProposal = proposals[proposalIds];
+		ProposalDetails storage newProposal = proposals[proposalIds];
 
 		newProposal.id = proposalIds;
 		newProposal.clubId = clubId;
@@ -128,9 +128,9 @@ contract Proposal {
 		uint256 proposalId,
 		uint256 duration
 	) external onlyAdminOrModerator {
-        ProposalDetails storage proposal = proposals[proposalId];
+		ProposalDetails storage proposal = proposals[proposalId];
 		require(duration > 500, "Duration must be positive");
-		require(proposalId <= _proposalIds.current(), "Invalid proposal ID");
+		require(proposalId < _proposalIds.current(), "Invalid proposal ID");
 		require(
 			proposal.status == Status.Pending,
 			"Proposal not in pending state"
@@ -154,8 +154,8 @@ contract Proposal {
 		uint256 _votingStartTime,
 		uint256 _votingEndTime
 	) external onlyAdminOrModerator {
-        ProposalDetails storage proposal = proposals[proposalId];
-		require(proposalId <= _proposalIds.current(), "Invalid proposal ID");
+		ProposalDetails storage proposal = proposals[proposalId];
+		require(proposalId < _proposalIds.current(), "Invalid proposal ID");
 		require(
 			proposal.status == Status.Pending,
 			"Proposal not in pending state"
@@ -180,16 +180,13 @@ contract Proposal {
 	}
 
 	function vote(uint256 proposalId, uint256 choiceIndex) external {
-        ProposalDetails storage proposal = proposals[proposalId];
-		require(proposalId <= _proposalIds.current(), "Invalid proposal ID");
+		ProposalDetails storage proposal = proposals[proposalId];
+		require(proposalId < _proposalIds.current(), "Invalid proposal ID");
 		require(
 			proposal.status == Status.Active,
 			"Proposal not in voting state"
 		);
-		require(
-			block.timestamp < proposal.votingEndTime,
-			"Voting has ended"
-		);
+		require(block.timestamp < proposal.votingEndTime, "Voting has ended");
 		require(
 			IClub(_clubs).isMember(msg.sender, proposal.clubId),
 			"Not a member of this club"
@@ -208,8 +205,8 @@ contract Proposal {
 	}
 
 	function endVoting(uint256 proposalId) external onlyAdminOrModerator {
-        ProposalDetails storage proposal = proposals[proposalId];
-		require(proposalId <= _proposalIds.current(), "Invalid proposal ID");
+		ProposalDetails storage proposal = proposals[proposalId];
+		require(proposalId < _proposalIds.current(), "Invalid proposal ID");
 		require(
 			proposal.status == Status.Active,
 			"Proposal not in voting state"
@@ -236,11 +233,7 @@ contract Proposal {
 			? Status.Passed
 			: Status.Rejected;
 
-		emit ProposalEnded(
-			proposalId,
-			proposal.status,
-			block.timestamp
-		);
+		emit ProposalEnded(proposalId, proposal.status, block.timestamp);
 	}
 
 	function getProposalsByClub(
@@ -253,7 +246,7 @@ contract Proposal {
 			unchecked {
 				endIndex = _proposalIds.current() - pageSize;
 			}
-        }
+		}
 		for (uint i = _proposalIds.current(); i >= endIndex; ) {
 			if (proposals[i].clubId == clubId) {
 				unchecked {
@@ -282,6 +275,58 @@ contract Proposal {
 		}
 
 		return clubProposals;
+	}
+
+    function getPageCursor(uint256 page, uint256 pageSize) internal view returns (uint256, uint256) {
+        require(pageSize > 0 && pageSize <= 100, "Invalid page size number!");
+        uint256 length = _proposalIds.current() - 1;
+
+        uint256 totalPages = length / pageSize;
+        if (length % pageSize != 0) {
+            unchecked {
+                ++totalPages;
+            }
+        }
+
+        require(page > 0 && page <= totalPages, "Invalid page number!");
+        // Calculate the starting and ending indices of items for the specified page
+        uint256 startItemIndex;
+        uint256 endItemIndex;
+
+        if (((page - 1)  * pageSize) < length) {
+            unchecked {
+              startItemIndex =  length -  ((page - 1)  * pageSize);
+            }
+        } else {
+            startItemIndex = length;
+        }
+
+        if (startItemIndex > pageSize) {
+            endItemIndex  = startItemIndex - pageSize + 1;
+        }
+
+        return (startItemIndex, endItemIndex);
+    }
+
+	function getProposals(
+		uint256 page,
+		uint256 pageSize
+	) external view returns (ProposalDetails[] memory) {
+        (uint256 startItemIndex, uint256 endItemIndex) = getPageCursor(page, pageSize);
+        
+        uint256 itemCount = startItemIndex - endItemIndex + 1;
+
+        ProposalDetails[] memory pageProposals = new ProposalDetails[](itemCount);
+        uint256 j = itemCount - 1;
+        for (uint256 i = endItemIndex; i <= startItemIndex;) {
+            pageProposals[j] = proposals[i];
+            unchecked {
+                ++i;
+                --j;
+            }
+        }
+
+        return pageProposals;
 	}
 
 	function getProposalsByPage(
@@ -378,7 +423,7 @@ contract Proposal {
 	function getProposalDetails(
 		uint256 proposalId
 	) external view returns (ProposalDetails memory) {
-		require(proposalId <= _proposalIds.current(), "Invalid proposal ID");
+		require(proposalId < _proposalIds.current(), "Invalid proposal ID");
 		return proposals[proposalId];
 	}
 }
