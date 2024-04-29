@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     Club: {
-      address: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc",
+      address: "0x4C4a2f8c81640e47606d3fd77B353E87Ba015584",
       abi: [
         {
           inputs: [
@@ -417,16 +417,23 @@ const deployedContracts = {
           type: "function",
         },
       ],
-      inheritedFunctions: {},
+      inheritedFunctions: {
+        isMember: "contracts/IClub.sol",
+      },
     },
     Proposal: {
-      address: "0x1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f",
+      address: "0x21dF544947ba3E8b3c32561399E88B52Dc8b2823",
       abi: [
         {
           inputs: [
             {
               internalType: "address",
               name: "rolesContract",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "clubAddress",
               type: "address",
             },
           ],
@@ -535,6 +542,19 @@ const deployedContracts = {
         },
         {
           inputs: [],
+          name: "_clubs",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
           name: "_roles",
           outputs: [
             {
@@ -558,11 +578,6 @@ const deployedContracts = {
               name: "_proposalId",
               type: "uint256",
             },
-            {
-              internalType: "address",
-              name: "clubAddress",
-              type: "address",
-            },
           ],
           name: "canVote",
           outputs: [
@@ -583,19 +598,19 @@ const deployedContracts = {
               type: "uint256",
             },
             {
-              internalType: "string",
+              internalType: "bytes32",
               name: "_title",
-              type: "string",
+              type: "bytes32",
             },
             {
-              internalType: "string",
+              internalType: "bytes32",
               name: "_description",
-              type: "string",
+              type: "bytes32",
             },
             {
-              internalType: "string[]",
-              name: "_choices",
-              type: "string[]",
+              internalType: "bytes32[]",
+              name: "_choicesContent",
+              type: "bytes32[]",
             },
           ],
           name: "createProposal",
@@ -657,26 +672,26 @@ const deployedContracts = {
                   type: "address",
                 },
                 {
-                  internalType: "string",
+                  internalType: "bytes32",
                   name: "title",
-                  type: "string",
+                  type: "bytes32",
                 },
                 {
-                  internalType: "string",
+                  internalType: "bytes32",
                   name: "description",
-                  type: "string",
+                  type: "bytes32",
                 },
                 {
                   components: [
                     {
-                      internalType: "string",
+                      internalType: "bytes32",
                       name: "description",
-                      type: "string",
+                      type: "bytes32",
                     },
                     {
-                      internalType: "uint256",
+                      internalType: "uint8",
                       name: "votes",
-                      type: "uint256",
+                      type: "uint8",
                     },
                   ],
                   internalType: "struct Proposal.Choice[]",
@@ -735,26 +750,26 @@ const deployedContracts = {
                   type: "address",
                 },
                 {
-                  internalType: "string",
+                  internalType: "bytes32",
                   name: "title",
-                  type: "string",
+                  type: "bytes32",
                 },
                 {
-                  internalType: "string",
+                  internalType: "bytes32",
                   name: "description",
-                  type: "string",
+                  type: "bytes32",
                 },
                 {
                   components: [
                     {
-                      internalType: "string",
+                      internalType: "bytes32",
                       name: "description",
-                      type: "string",
+                      type: "bytes32",
                     },
                     {
-                      internalType: "uint256",
+                      internalType: "uint8",
                       name: "votes",
-                      type: "uint256",
+                      type: "uint8",
                     },
                   ],
                   internalType: "struct Proposal.Choice[]",
@@ -813,26 +828,26 @@ const deployedContracts = {
                   type: "address",
                 },
                 {
-                  internalType: "string",
+                  internalType: "bytes32",
                   name: "title",
-                  type: "string",
+                  type: "bytes32",
                 },
                 {
-                  internalType: "string",
+                  internalType: "bytes32",
                   name: "description",
-                  type: "string",
+                  type: "bytes32",
                 },
                 {
                   components: [
                     {
-                      internalType: "string",
+                      internalType: "bytes32",
                       name: "description",
-                      type: "string",
+                      type: "bytes32",
                     },
                     {
-                      internalType: "uint256",
+                      internalType: "uint8",
                       name: "votes",
-                      type: "uint256",
+                      type: "uint8",
                     },
                   ],
                   internalType: "struct Proposal.Choice[]",
@@ -901,26 +916,26 @@ const deployedContracts = {
                   type: "address",
                 },
                 {
-                  internalType: "string",
+                  internalType: "bytes32",
                   name: "title",
-                  type: "string",
+                  type: "bytes32",
                 },
                 {
-                  internalType: "string",
+                  internalType: "bytes32",
                   name: "description",
-                  type: "string",
+                  type: "bytes32",
                 },
                 {
                   components: [
                     {
-                      internalType: "string",
+                      internalType: "bytes32",
                       name: "description",
-                      type: "string",
+                      type: "bytes32",
                     },
                     {
-                      internalType: "uint256",
+                      internalType: "uint8",
                       name: "votes",
-                      type: "uint256",
+                      type: "uint8",
                     },
                   ],
                   internalType: "struct Proposal.Choice[]",
@@ -1004,11 +1019,6 @@ const deployedContracts = {
               name: "choiceIndex",
               type: "uint256",
             },
-            {
-              internalType: "address",
-              name: "clubAddress",
-              type: "address",
-            },
           ],
           name: "vote",
           outputs: [],
@@ -1019,7 +1029,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     Roles: {
-      address: "0x7969c5eD335650692Bc04293B07F5BF2e7A673C0",
+      address: "0x04C89607413713Ec9775E14b954286519d836FEf",
       abi: [
         {
           inputs: [
@@ -1522,149 +1532,6 @@ const deployedContracts = {
         revokeRole: "@openzeppelin/contracts/access/AccessControl.sol",
         supportsInterface: "@openzeppelin/contracts/access/AccessControl.sol",
       },
-    },
-    YourContract: {
-      address: "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
-      abi: [
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "_owner",
-              type: "address",
-            },
-          ],
-          stateMutability: "nonpayable",
-          type: "constructor",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "address",
-              name: "greetingSetter",
-              type: "address",
-            },
-            {
-              indexed: false,
-              internalType: "string",
-              name: "newGreeting",
-              type: "string",
-            },
-            {
-              indexed: false,
-              internalType: "bool",
-              name: "premium",
-              type: "bool",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "value",
-              type: "uint256",
-            },
-          ],
-          name: "GreetingChange",
-          type: "event",
-        },
-        {
-          inputs: [],
-          name: "greeting",
-          outputs: [
-            {
-              internalType: "string",
-              name: "",
-              type: "string",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "owner",
-          outputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "premium",
-          outputs: [
-            {
-              internalType: "bool",
-              name: "",
-              type: "bool",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "string",
-              name: "_newGreeting",
-              type: "string",
-            },
-          ],
-          name: "setGreeting",
-          outputs: [],
-          stateMutability: "payable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "totalCounter",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "userGreetingCounter",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "withdraw",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          stateMutability: "payable",
-          type: "receive",
-        },
-      ],
-      inheritedFunctions: {},
     },
   },
 } as const;
