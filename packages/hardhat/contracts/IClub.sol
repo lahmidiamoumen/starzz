@@ -6,4 +6,6 @@ interface IClub {
 		address user,
 		uint256 clubId
 	) external view returns (bool);
+
+	function isValidClubId(uint256 clubId) external view returns (bool);
 }

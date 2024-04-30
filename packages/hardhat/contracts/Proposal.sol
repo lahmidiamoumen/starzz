@@ -69,6 +69,7 @@ contract Proposal {
 		string[] memory _choicesContent
 	) external onlyAdminOrModerator {
 		// require(IClub(_clubs).getClubModerator(clubId) == _msgSender(), "Not a moderator of this club");
+		require(IClub(_clubs).isValidClubId(clubId), "Invalid proposal ID");
 		require(
 			_choicesContent.length > 1 && _choicesContent.length <= 10,
 			"Invalid number of choices"
@@ -154,19 +155,19 @@ contract Proposal {
 		uint256 _votingStartTime,
 		uint256 _votingEndTime
 	) external onlyAdminOrModerator {
-		ProposalDetails storage proposal = proposals[proposalId];
 		require(proposalId < _proposalIds.current(), "Invalid proposal ID");
 		require(
-			proposal.status == Status.Pending,
-			"Proposal not in pending state"
-		);
-		require(
-			_votingStartTime > block.timestamp,
+			_votingStartTime >= block.timestamp,
 			"Start time must be in the future"
 		);
 		require(
 			_votingEndTime > _votingStartTime,
 			"End time must be after start time"
+		);
+		ProposalDetails storage proposal = proposals[proposalId];
+		require(
+			proposal.status == Status.Pending,
+			"Proposal not in pending state"
 		);
 		proposal.status = Status.Active;
 		proposal.votingStartTime = _votingStartTime;
@@ -210,10 +211,6 @@ contract Proposal {
 		require(
 			proposal.status == Status.Active,
 			"Proposal not in voting state"
-		);
-		require(
-			block.timestamp >= proposal.votingEndTime,
-			"Voting has not ended yet"
 		);
 
 		uint256 winningChoiceIndex;

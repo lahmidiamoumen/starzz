@@ -59,6 +59,10 @@ contract Club is IClub {
 		return msg.sender;
 	}
 
+	function isValidClubId(uint256 clubId) external view returns (bool) {
+		return clubId >= 0 && clubId <= _clubIds.current();
+	}
+
 	function createClub(string memory name) external onlyAdminOrModerator {
 		uint256 clubId = _clubIds.current();
 		_clubIds.increment();

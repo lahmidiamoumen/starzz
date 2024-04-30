@@ -19,19 +19,19 @@ describe("Roles", function () {
   });
   describe("Role Granting", function () {
     it("Grants Moderator role to a new address by Admin", async () => {
-      const newModerator = signers[1]; // Use the second signer
+      const newModerator = signers[1];
 
-      expect(await roles.isModerator(newModerator)).to.be.false; // Check initial state
+      expect(await roles.isModerator(newModerator)).to.be.false;
 
       await roles.connect(owner).grantModeratorRole(newModerator);
 
       expect(await roles.isModerator(newModerator)).to.be.true;
-      expect(await roles.isAdminOrModerator(newModerator)).to.be.true; // Verify moderator can be staff
+      expect(await roles.isAdminOrModerator(newModerator)).to.be.true;
     });
 
     it("Grants CS role to a new address by Admin", async () => {
-      const newCS = signers[2]; // Use the third signer
-      const moderator = signers[3]; // Use the third signer
+      const newCS = signers[2];
+      const moderator = signers[3];
 
       expect(await roles.isCS(newCS)).to.be.false;
 
@@ -53,7 +53,7 @@ describe("Roles", function () {
     });
 
     it("Reverts granting an existing role", async () => {
-      const newModerator = signers[1]; // Use the second signer
+      const newModerator = signers[1];
 
       await roles.connect(owner).grantModeratorRole(newModerator);
 
@@ -64,20 +64,28 @@ describe("Roles", function () {
 
   describe("Role Revoking", function () {
     it("Revokes Moderator role from an address by Admin", async () => {
-      const newModerator = signers[1]; // Use the second signer
+      const newModerator = signers[1];
+      const newAdmin = signers[2];
 
-      await roles.connect(owner).grantModeratorRole(newModerator);
+      expect(await roles.isAdmin(newAdmin)).to.be.false;
+      await roles.connect(owner).grantAdminRole(newAdmin);
+      expect(await roles.isAdmin(newAdmin)).to.be.true;
+
+      await roles.connect(newAdmin).grantModeratorRole(newModerator);
       expect(await roles.isModerator(newModerator)).to.be.true;
 
-      await roles.connect(owner).revokeModeratorRole(newModerator);
+      await roles.connect(newAdmin).revokeModeratorRole(newModerator);
 
       expect(await roles.isModerator(newModerator)).to.be.false;
-      expect(await roles.isAdminOrModerator(newModerator)).to.be.false; // No longer staff
+      expect(await roles.isAdminOrModerator(newModerator)).to.be.false;
+
+      await roles.connect(owner).revokeAdminRole(newAdmin);
+      expect(await roles.isAdmin(newAdmin)).to.be.false;
     });
 
     it("Revokes CS role from an address by Admin or Moderator", async () => {
-      const newCS = signers[2]; // Use the third signer
-      const moderator = signers[1]; // Use the second signer (moderator)
+      const newCS = signers[2];
+      const moderator = signers[1];
 
       await roles.connect(owner).grantModeratorRole(moderator);
 
@@ -90,38 +98,41 @@ describe("Roles", function () {
       await roles.connect(moderator).revokeCSRole(newCS); // Should still work
       expect(await roles.isCS(newCS)).to.be.false;
     });
-
-    // ... other role revoking tests (similarly update for CS and Fan roles)
   });
 
   describe("View Functions", function () {
     it("isAdminOrModerator returns true for Admin and Moderator roles", async () => {
-      const moderator = signers[1]; // Use the second signer
-      const user = signers[2]; // Use the second signer
+      const moderator = signers[1];
+      const user = signers[2];
+      const admin = signers[3];
 
       expect(await roles.isAdminOrModerator(moderator)).to.be.false;
+      expect(await roles.isAdminOrModerator(admin)).to.be.false;
 
       await roles.connect(owner).grantModeratorRole(moderator);
+      await roles.connect(owner).grantAdminRole(admin);
 
       expect(await roles.isAdminOrModerator(owner)).to.be.true;
       expect(await roles.isAdminOrModerator(moderator)).to.be.true;
+      expect(await roles.isAdminOrModerator(admin)).to.be.true;
       expect(await roles.isAdminOrModerator(user)).to.be.false;
     });
 
     it("isStaff returns true for Admin, Moderator, and CS roles", async () => {
-      const moderator = signers[1]; // Use the second signer
-      const newCS = signers[2]; // Use the third signer
-      const user = signers[3]; // Use the third signer
+      const moderator = signers[1];
+      const newCS = signers[2];
+      const user = signers[3];
+      const admin = signers[4];
 
-      await roles.connect(owner).grantModeratorRole(moderator);
+      await roles.connect(owner).grantAdminRole(admin);
+      await roles.connect(admin).grantModeratorRole(moderator);
       await roles.connect(moderator).grantCSRole(newCS);
 
       expect(await roles.isStaff(owner)).to.be.true;
       expect(await roles.isStaff(moderator)).to.be.true;
       expect(await roles.isStaff(newCS)).to.be.true;
+      expect(await roles.isStaff(admin)).to.be.true;
       expect(await roles.isStaff(user)).to.be.false;
     });
-
-    // Add similar tests for isCS and isAdmin functions (if applicable)
   });
 });
