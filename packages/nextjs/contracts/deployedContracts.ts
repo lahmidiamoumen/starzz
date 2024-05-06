@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     Club: {
-      address: "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2",
+      address: "0x0165878A594ca255338adfa4d48449f69242Eb8F",
       abi: [
         {
           inputs: [
@@ -148,7 +148,7 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
-          name: "_clubDetails",
+          name: "_clubs",
           outputs: [
             {
               internalType: "uint256",
@@ -164,6 +164,11 @@ const deployedContracts = {
               internalType: "address",
               name: "creator",
               type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "createdOn",
+              type: "uint256",
             },
           ],
           stateMutability: "view",
@@ -227,6 +232,25 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
+          name: "didIRequestedMembership",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
+            },
+          ],
           name: "getClubCreator",
           outputs: [
             {
@@ -265,8 +289,23 @@ const deployedContracts = {
                   name: "creator",
                   type: "address",
                 },
+                {
+                  internalType: "uint256",
+                  name: "createdOn",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "joinedOn",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "membershipRequestedOn",
+                  type: "uint256",
+                },
               ],
-              internalType: "struct Club.ClubDetails",
+              internalType: "struct Club.ClubPresenter",
               name: "",
               type: "tuple",
             },
@@ -278,16 +317,53 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "uint256",
-              name: "clubId",
+              name: "page",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "pageSize",
               type: "uint256",
             },
           ],
-          name: "hasRequestedMembership",
+          name: "getClubs",
           outputs: [
             {
-              internalType: "bool",
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "id",
+                  type: "uint256",
+                },
+                {
+                  internalType: "string",
+                  name: "name",
+                  type: "string",
+                },
+                {
+                  internalType: "address",
+                  name: "creator",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "createdOn",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "joinedOn",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "membershipRequestedOn",
+                  type: "uint256",
+                },
+              ],
+              internalType: "struct Club.ClubPresenter[]",
               name: "",
-              type: "bool",
+              type: "tuple[]",
             },
           ],
           stateMutability: "view",
@@ -331,6 +407,25 @@ const deployedContracts = {
             },
           ],
           name: "isMember",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
+            },
+          ],
+          name: "isValidClubId",
           outputs: [
             {
               internalType: "bool",
@@ -406,10 +501,11 @@ const deployedContracts = {
       ],
       inheritedFunctions: {
         isMember: "contracts/IClub.sol",
+        isValidClubId: "contracts/IClub.sol",
       },
     },
     Proposal: {
-      address: "0x2B0d36FACD61B71CC05ab8F3D2355ec3631C0dd5",
+      address: "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
       abi: [
         {
           inputs: [
@@ -1073,7 +1169,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     Roles: {
-      address: "0x04C89607413713Ec9775E14b954286519d836FEf",
+      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
       abi: [
         {
           inputs: [
