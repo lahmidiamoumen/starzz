@@ -2,10 +2,9 @@
 
 import * as React from "react";
 import Link from "next/link";
+import JoinButton from "../JoinClub";
 import { Address } from "../scaffold-eth";
-// Use useMemo for optimized pagination calculations
 import type { NextPage } from "next";
-import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { useGetClubs } from "~~/hooks/services/use-get-clubs";
 
 const ClubsList: NextPage = () => {
@@ -56,19 +55,16 @@ const ClubsList: NextPage = () => {
                     <p className="my-0 text-sm text-center mb-4">
                       <span>ID: {item.id.toString()}</span>
                     </p>
-                    {item.membershipRequestedOn !== BigInt(0) && (
-                      <button className="btn btn-secondary btn-sm" disabled={true}>
-                        Requested{" "}
-                      </button>
-                    )}
-                    {item.joinedOn !== BigInt(0) && (
-                      <button className="btn btn-secondary btn-sm" disabled={true}>
-                        Joined{" "}
-                      </button>
-                    )}
-                    {item.joinedOn === BigInt(0) && item.membershipRequestedOn === BigInt(0) && (
-                      <JoinButton clubId={item.id} />
-                    )}
+                    <JoinButton
+                      status={
+                        item.membershipRequestedOn !== BigInt(0)
+                          ? "requested"
+                          : item.joinedOn !== BigInt(0)
+                          ? "member"
+                          : "nan"
+                      }
+                      clubId={item.id}
+                    />
                   </div>
                 </div>
               </div>
@@ -91,43 +87,6 @@ const ClubsList: NextPage = () => {
       )}
       {clubs.length === 0 && <span className="tune-button mt-4 w-full">No Clubs Created!</span>}
     </>
-  );
-};
-
-const JoinButton = ({ clubId }: { clubId: bigint }): React.ReactNode => {
-  const { isSuccess, isPending, writeContractAsync } = useScaffoldWriteContract("Club");
-
-  const handleJoin = async () => {
-    try {
-      await writeContractAsync(
-        {
-          functionName: "joinClub",
-          args: [clubId],
-        },
-        {
-          onBlockConfirmation: txnReceipt => {
-            console.log("📦 Transaction blockHash", txnReceipt.blockHash);
-          },
-        },
-      );
-    } catch (e) {
-      console.error("Error setting greeting", e);
-      // notification.error(getParsedError(e));
-    }
-  };
-
-  // React.useEffect(() => {
-  //   if (error) {
-  //     notification.error(getParsedError(error));
-  //   }
-  // }, [error]);
-
-  return (
-    <button disabled={isPending || isSuccess} onClick={handleJoin} type="button" className="btn btn-secondary btn-sm">
-      {isPending && <span className="loading loading-spinner loading-sm"></span>}
-      {isSuccess && !isPending && <span>Requested</span>}
-      {!isSuccess && !isPending && <span>Join</span>}
-    </button>
   );
 };
 

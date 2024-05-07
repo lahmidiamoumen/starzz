@@ -308,21 +308,43 @@ contract Proposal {
 		uint256 page,
 		uint256 pageSize
 	) external view returns (ProposalDetails[] memory) {
-        (uint256 startItemIndex, uint256 endItemIndex) = getPageCursor(page, pageSize);
-        
-        uint256 itemCount = startItemIndex - endItemIndex + 1;
+			(uint256 startItemIndex, uint256 endItemIndex) = getPageCursor(page, pageSize);
+			
+			uint256 itemCount = startItemIndex - endItemIndex + 1;
 
-        ProposalDetails[] memory pageProposals = new ProposalDetails[](itemCount);
-        uint256 j = itemCount - 1;
-        for (uint256 i = endItemIndex; i <= startItemIndex;) {
-            pageProposals[j] = _proposals[i];
-            unchecked {
-                ++i;
-                --j;
-            }
-        }
+			ProposalDetails[] memory pageProposals = new ProposalDetails[](itemCount);
+			uint256 j = itemCount - 1;
+			for (uint256 i = endItemIndex; i <= startItemIndex;) {
+					pageProposals[j] = _proposals[i];
+					unchecked {
+							++i;
+							--j;
+					}
+			}
 
-        return pageProposals;
+			return pageProposals;
+	}
+
+	function getProposals(
+		uint256 clubId,
+		uint256 page,
+		uint256 pageSize
+	) external view returns (ProposalDetails[] memory) {
+			(uint256 startItemIndex, uint256 endItemIndex) = getPageCursor(page, pageSize);
+			
+			uint256 itemCount = startItemIndex - endItemIndex + 1;
+
+			ProposalDetails[] memory pageProposals = new ProposalDetails[](itemCount);
+			uint256 j = itemCount - 1;
+			for (uint256 i = endItemIndex; i <= startItemIndex;) {
+					pageProposals[j] = _proposals[i];
+					unchecked {
+							++i;
+							--j;
+					}
+			}
+
+			return pageProposals;
 	}
 
 	function getProposalsByPage(
