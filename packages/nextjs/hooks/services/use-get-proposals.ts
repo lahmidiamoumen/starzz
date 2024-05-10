@@ -2,32 +2,47 @@
 
 import * as React from "react";
 import { useDeployedContractInfo, useScaffoldReadContract } from "../scaffold-eth";
-import { ProposalRecord } from "~~/types/proposal";
+import { ProposalPresnter } from "~~/types/proposal";
 import { PaginationState } from "~~/types/utils";
 import { getParsedError, notification } from "~~/utils/scaffold-eth";
 import { debounce, isEqual } from "~~/utils/scaffold-eth/common";
 
 const contractName = "Proposal";
 
-export const useGetProposals = () => {
+type Props = {
+  clubId: number;
+};
+
+export const useGetProposals = ({ clubId }: Props) => {
   const { data: deployedContractData, isLoading: deployedContractLoading } = useDeployedContractInfo(contractName);
   const [pagination, setPagination] = React.useState<PaginationState>({
     currentPage: 1,
     pageSize: 4,
   });
-  const [data, setData] = React.useState<ProposalRecord[]>([]);
+
+  const [data, setData] = React.useState<ProposalPresnter[]>([]);
+  const [noMoreResults, toggleNoMoreResults] = React.useReducer(prv => !prv, false);
+  const [emptyResults, toogleEmptyResults] = React.useReducer(prv => !prv, false);
   const [prevPagination, setPrevPagination] = React.useState<PaginationState | null>(null);
 
   const { refetch, error, isLoading, isFetching, isSuccess } = useScaffoldReadContract({
     functionName: "getProposals",
     contractName: contractName,
-    args: [BigInt(pagination.currentPage), BigInt(pagination.pageSize)],
+    args: [BigInt(clubId), BigInt(pagination.currentPage), BigInt(pagination.pageSize)],
   });
 
   const load = React.useCallback(async () => {
     try {
-      const { data: result } = await refetch();
-      if (result) {
+      const { data: result, error } = await refetch();
+      if (error) {
+        throw error;
+      } else if (result == undefined) {
+        throw "unknown error";
+      } else if (data.length > 0 && result.length === 0) {
+        toggleNoMoreResults();
+      } else if (data.length === 0 && result.length === 0) {
+        toogleEmptyResults();
+      } else {
         setData(prv => [...prv, ...result]);
       }
     } catch (error) {
@@ -35,9 +50,9 @@ export const useGetProposals = () => {
       notification.error(getParsedError(error));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setData]);
+  }, [data.length, setData]);
 
-  const debouncedLoad = debounce(load, 100);
+  const debouncedLoad = debounce(load, 400);
 
   React.useEffect(() => {
     if (!isLoading && error === null && !isEqual(pagination, prevPagination)) {
@@ -50,12 +65,6 @@ export const useGetProposals = () => {
     }
   }, [pagination, isLoading, error, prevPagination, debouncedLoad, load]);
 
-  // React.useEffect(() => {
-  //   if (isFetching && error) {
-  //     notification.error(getParsedError(error));
-  //   }
-  // }, [error, isFetching]);
-
   const handleLoadMore = () => {
     setPagination(prev => ({ ...prev, currentPage: prev.currentPage + 1 }));
   };
@@ -64,6 +73,8 @@ export const useGetProposals = () => {
     deployedContractData,
     deployedContractLoading,
     handleLoadMore,
+    noMoreResults,
+    emptyResults,
     contractName,
     isFetching,
     isLoading,

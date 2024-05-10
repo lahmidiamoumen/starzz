@@ -93,7 +93,7 @@ contract Club is IClub {
 		address user,
 		uint256 clubId
 	) external view returns (bool) {
-		return getMember(user,clubId) > 0;
+		return getMember(user, clubId) > 0;
 	}
 
 	function _msgSender() internal view returns (address) {
@@ -106,11 +106,16 @@ contract Club is IClub {
 
 	function createClub(string memory name) external onlyAdminOrModerator {
 		uint size = getStringLength(name);
-		require( size > 3 && 44 > size, "Invalid club ID");
+		require(size > 3 && 44 > size, "Invalid club name");
 		uint256 clubId = _clubIds.current();
 		_clubIds.increment();
 
-		_clubs[clubId] = ClubDetails(clubId, name, _msgSender(), block.timestamp);
+		_clubs[clubId] = ClubDetails(
+			clubId,
+			name,
+			_msgSender(),
+			block.timestamp
+		);
 		emit ClubCreated(clubId, name, _msgSender());
 	}
 
@@ -178,14 +183,15 @@ contract Club is IClub {
 		address user = _msgSender();
 		uint256 memberJoinedOn = getMember(user, club.id);
 		uint256 membershipRequestedAt = getMembershipRequestDate(user, club.id);
-		return ClubPresenter({
-						id: club.id,
-						name: club.name,
-						creator: club.creator,
-						createdOn: club.createdOn,
-						joinedOn: memberJoinedOn,
-						membershipRequestedOn: membershipRequestedAt
-				});
+		return
+			ClubPresenter({
+				id: club.id,
+				name: club.name,
+				creator: club.creator,
+				createdOn: club.createdOn,
+				joinedOn: memberJoinedOn,
+				membershipRequestedOn: membershipRequestedAt
+			});
 	}
 
 	function hasRequestedMembership(
@@ -200,7 +206,7 @@ contract Club is IClub {
 		uint256 clubId
 	) external view returns (bool) {
 		require(clubId <= _clubIds.current(), "Invalid club ID");
-		return getMembershipRequestDate( _msgSender(), clubId) > 0;
+		return getMembershipRequestDate(_msgSender(), clubId) > 0;
 	}
 
 	function getClubCreator(
@@ -220,78 +226,91 @@ contract Club is IClub {
 		emit LeftClub(_msgSender(), clubId);
 	}
 
-	function getPageCursor(uint256 page, uint256 pageSize) internal view returns (uint256, uint256) {
-			require(pageSize > 0 && pageSize <= 100, "Invalid page size number!");
-			uint256 length = _clubIds.current() - 1;
+	function getPageCursor(
+		uint256 page,
+		uint256 pageSize
+	) internal view returns (uint256, uint256) {
+		uint256 length = _clubIds.current();
 
-			uint256 totalPages = length / pageSize;
-			if (length % pageSize != 0) {
-					unchecked {
-							++totalPages;
-					}
+		if (length == 0) {
+			return (0, 0);
+		}
+
+		uint256 totalPages = length / pageSize;
+		if (length % pageSize != 0) {
+			unchecked {
+				++totalPages;
 			}
+		}
 
-			require(page > 0 && page <= totalPages, "Invalid page number!");
-			uint256 startItemIndex;
-			uint256 endItemIndex;
+		if (page > totalPages) {
+			return (0, 0);
+		}
 
-			if (((page - 1)  * pageSize) < length) {
-					unchecked {
-						startItemIndex =  length -  ((page - 1)  * pageSize);
-					}
-			} else {
-					startItemIndex = length;
+		uint256 startItemIndex;
+		uint256 endItemIndex;
+
+		if (((page - 1) * pageSize) < length) {
+			unchecked {
+				startItemIndex = length - ((page - 1) * pageSize);
 			}
+		} else {
+			startItemIndex = length;
+		}
 
-			if (startItemIndex > pageSize) {
-					endItemIndex  = startItemIndex - pageSize + 1;
-			}
+		if (startItemIndex > pageSize) {
+			endItemIndex = startItemIndex - pageSize;
+		}
 
-			return (startItemIndex, endItemIndex);
+		return (startItemIndex, endItemIndex);
 	}
 
 	function getClubs(
 		uint256 page,
 		uint256 pageSize
 	) external view returns (ClubPresenter[] memory) {
-        (uint256 startItemIndex, uint256 endItemIndex) = getPageCursor(page, pageSize);
-        
-        uint256 itemCount = startItemIndex - endItemIndex + 1;
-				address user = _msgSender();
+		require(pageSize > 0 && pageSize <= 100, "Invalid page size number!");
+		require(page > 0 , "Invalid page number!");
+		(uint256 startItemIndex, uint256 endItemIndex) = getPageCursor(
+			page,
+			pageSize
+		);
 
-        ClubPresenter[] memory pageClubs = new ClubPresenter[](itemCount);
-        uint256 j = itemCount - 1;
-        for (uint256 i = endItemIndex; i <= startItemIndex;) {
-						ClubDetails memory club = _clubs[i];
-						uint256 memberJoinedOn = getMember(user,club.id);
-						uint256 membershipRequestedAt = getMembershipRequestDate(user, club.id);
+		uint256 itemCount = startItemIndex - endItemIndex;
+		if (itemCount < 1) {
+			return new ClubPresenter[](0);
+		}
+		address user = _msgSender();
 
-						console.log(
-							club.id,
-							memberJoinedOn,
-							membershipRequestedAt,
-							user
-						);
+		ClubPresenter[] memory pageClubs = new ClubPresenter[](itemCount);
+		uint256 j = itemCount - 1;
+		for (uint256 i = endItemIndex; i < startItemIndex; ) {
+			ClubDetails memory club = _clubs[i];
+			uint256 memberJoinedOn = getMember(user, club.id);
+			uint256 membershipRequestedAt = getMembershipRequestDate(
+				user,
+				club.id
+			);
 
-						pageClubs[j] = ClubPresenter({
-								id: club.id,
-								name: club.name,
-								creator: club.creator,
-								createdOn: club.createdOn,
-								joinedOn: memberJoinedOn,
-								membershipRequestedOn: membershipRequestedAt
-						});
-            unchecked {
-                ++i;
-                --j;
-            }
-        }
+			pageClubs[j] = ClubPresenter({
+				id: club.id,
+				name: club.name,
+				creator: club.creator,
+				createdOn: club.createdOn,
+				joinedOn: memberJoinedOn,
+				membershipRequestedOn: membershipRequestedAt
+			});
+			unchecked {
+				++i;
+				--j;
+			}
+		}
 
-        return pageClubs;
+		return pageClubs;
 	}
 
 	function getStringLength(string memory _str) internal pure returns (uint) {
-			bytes memory strBytes = bytes(_str);
-			return strBytes.length;
+		bytes memory strBytes = bytes(_str);
+		return strBytes.length;
 	}
 }

@@ -1,6 +1,4 @@
 export interface ProposalRecord {
-  id: bigint;
-  clubId: bigint;
   creator: string;
   title: string;
   description: string;
@@ -8,6 +6,10 @@ export interface ProposalRecord {
   status: number;
   votingStartTime: bigint;
   votingEndTime: bigint;
+}
+
+export interface ProposalPresnter extends ProposalRecord {
+  proposalId: bigint;
 }
 
 export interface ChoiceRecord {

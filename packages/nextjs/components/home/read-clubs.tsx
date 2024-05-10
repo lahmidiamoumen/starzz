@@ -12,16 +12,25 @@ const ClubsList: NextPage = () => {
     deployedContractData: ClubContract,
     deployedContractLoading: ClubContractLoading,
     handleLoadMore,
+    noMoreResults,
+    emptyResults,
     payload: clubs,
-    isSuccess,
-    isLoading,
     pagination,
+    isLoading,
   } = useGetClubs();
 
-  if (ClubContractLoading || (isSuccess && clubs.length === 0)) {
+  if (ClubContractLoading) {
     return (
       <div className="mt-14">
         <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
+  }
+
+  if (emptyResults) {
+    return (
+      <div className="text-center text-gray-500">
+        <p className="text-1xl mt-14">{`No record found!`}</p>
       </div>
     );
   }
@@ -71,7 +80,7 @@ const ClubsList: NextPage = () => {
             ))}
           </div>
           <div className="flex justify-center mt-4">
-            {clubs.length % pagination.pageSize === 0 && (
+            {!noMoreResults && clubs.length !== 0 && clubs.length % pagination.pageSize === 0 && (
               <button
                 disabled={isLoading}
                 onClick={handleLoadMore}
@@ -81,11 +90,13 @@ const ClubsList: NextPage = () => {
                 Load More
               </button>
             )}
-            {clubs.length % pagination.pageSize !== 0 && <p className="text-center text-gray-500">All clubs loaded.</p>}
+            {noMoreResults ||
+              (clubs.length % pagination.pageSize !== 0 && (
+                <p className="text-center text-gray-500">All clubs loaded.</p>
+              ))}
           </div>
         </div>
       )}
-      {clubs.length === 0 && <span className="tune-button mt-4 w-full">No Clubs Created!</span>}
     </>
   );
 };

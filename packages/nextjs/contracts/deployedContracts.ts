@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     Club: {
-      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      address: "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44",
       abi: [
         {
           inputs: [
@@ -505,7 +505,7 @@ const deployedContracts = {
       },
     },
     Proposal: {
-      address: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+      address: "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
       abi: [
         {
           inputs: [
@@ -627,12 +627,17 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "address",
-              name: "_account",
+              name: "account",
               type: "address",
             },
             {
               internalType: "uint256",
-              name: "_proposalId",
+              name: "proposalId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "clubId",
               type: "uint256",
             },
           ],
@@ -682,6 +687,11 @@ const deployedContracts = {
               name: "proposalId",
               type: "uint256",
             },
+            {
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
+            },
           ],
           name: "endVoting",
           outputs: [],
@@ -689,7 +699,13 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [],
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
+            },
+          ],
           name: "getProposalCount",
           outputs: [
             {
@@ -708,6 +724,11 @@ const deployedContracts = {
               name: "proposalId",
               type: "uint256",
             },
+            {
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
+            },
           ],
           name: "getProposalDetails",
           outputs: [
@@ -715,12 +736,7 @@ const deployedContracts = {
               components: [
                 {
                   internalType: "uint256",
-                  name: "id",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "clubId",
+                  name: "proposalId",
                   type: "uint256",
                 },
                 {
@@ -771,7 +787,7 @@ const deployedContracts = {
                   type: "uint256",
                 },
               ],
-              internalType: "struct Proposal.ProposalDetails",
+              internalType: "struct Proposal.ProposalPresnter",
               name: "",
               type: "tuple",
             },
@@ -781,6 +797,11 @@ const deployedContracts = {
         },
         {
           inputs: [
+            {
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
+            },
             {
               internalType: "uint256",
               name: "page",
@@ -798,12 +819,7 @@ const deployedContracts = {
               components: [
                 {
                   internalType: "uint256",
-                  name: "id",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "clubId",
+                  name: "proposalId",
                   type: "uint256",
                 },
                 {
@@ -854,7 +870,7 @@ const deployedContracts = {
                   type: "uint256",
                 },
               ],
-              internalType: "struct Proposal.ProposalDetails[]",
+              internalType: "struct Proposal.ProposalPresnter[]",
               name: "",
               type: "tuple[]",
             },
@@ -864,271 +880,14 @@ const deployedContracts = {
         },
         {
           inputs: [
+            {
+              internalType: "uint256",
+              name: "proposalId",
+              type: "uint256",
+            },
             {
               internalType: "uint256",
               name: "clubId",
-              type: "uint256",
-            },
-          ],
-          name: "getProposalsByClub",
-          outputs: [
-            {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "id",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "clubId",
-                  type: "uint256",
-                },
-                {
-                  internalType: "address",
-                  name: "creator",
-                  type: "address",
-                },
-                {
-                  internalType: "string",
-                  name: "title",
-                  type: "string",
-                },
-                {
-                  internalType: "string",
-                  name: "description",
-                  type: "string",
-                },
-                {
-                  components: [
-                    {
-                      internalType: "string",
-                      name: "description",
-                      type: "string",
-                    },
-                    {
-                      internalType: "uint8",
-                      name: "votes",
-                      type: "uint8",
-                    },
-                  ],
-                  internalType: "struct Proposal.Choice[]",
-                  name: "choices",
-                  type: "tuple[]",
-                },
-                {
-                  internalType: "enum Proposal.Status",
-                  name: "status",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint256",
-                  name: "votingStartTime",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "votingEndTime",
-                  type: "uint256",
-                },
-              ],
-              internalType: "struct Proposal.ProposalDetails[]",
-              name: "",
-              type: "tuple[]",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "moderator",
-              type: "address",
-            },
-          ],
-          name: "getProposalsByModerator",
-          outputs: [
-            {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "id",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "clubId",
-                  type: "uint256",
-                },
-                {
-                  internalType: "address",
-                  name: "creator",
-                  type: "address",
-                },
-                {
-                  internalType: "string",
-                  name: "title",
-                  type: "string",
-                },
-                {
-                  internalType: "string",
-                  name: "description",
-                  type: "string",
-                },
-                {
-                  components: [
-                    {
-                      internalType: "string",
-                      name: "description",
-                      type: "string",
-                    },
-                    {
-                      internalType: "uint8",
-                      name: "votes",
-                      type: "uint8",
-                    },
-                  ],
-                  internalType: "struct Proposal.Choice[]",
-                  name: "choices",
-                  type: "tuple[]",
-                },
-                {
-                  internalType: "enum Proposal.Status",
-                  name: "status",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint256",
-                  name: "votingStartTime",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "votingEndTime",
-                  type: "uint256",
-                },
-              ],
-              internalType: "struct Proposal.ProposalDetails[]",
-              name: "",
-              type: "tuple[]",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "uint256",
-              name: "pageNumber",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "pageSize",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "lastProposalId",
-              type: "uint256",
-            },
-          ],
-          name: "getProposalsByPage",
-          outputs: [
-            {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "id",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "clubId",
-                  type: "uint256",
-                },
-                {
-                  internalType: "address",
-                  name: "creator",
-                  type: "address",
-                },
-                {
-                  internalType: "string",
-                  name: "title",
-                  type: "string",
-                },
-                {
-                  internalType: "string",
-                  name: "description",
-                  type: "string",
-                },
-                {
-                  components: [
-                    {
-                      internalType: "string",
-                      name: "description",
-                      type: "string",
-                    },
-                    {
-                      internalType: "uint8",
-                      name: "votes",
-                      type: "uint8",
-                    },
-                  ],
-                  internalType: "struct Proposal.Choice[]",
-                  name: "choices",
-                  type: "tuple[]",
-                },
-                {
-                  internalType: "enum Proposal.Status",
-                  name: "status",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint256",
-                  name: "votingStartTime",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "votingEndTime",
-                  type: "uint256",
-                },
-              ],
-              internalType: "struct Proposal.ProposalDetails[]",
-              name: "",
-              type: "tuple[]",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "uint256",
-              name: "proposalId",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "duration",
-              type: "uint256",
-            },
-          ],
-          name: "startVoting",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "uint256",
-              name: "proposalId",
               type: "uint256",
             },
             {
@@ -1152,6 +911,34 @@ const deployedContracts = {
             {
               internalType: "uint256",
               name: "proposalId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "duration",
+              type: "uint256",
+            },
+          ],
+          name: "startVoting",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "proposalId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "clubId",
               type: "uint256",
             },
             {

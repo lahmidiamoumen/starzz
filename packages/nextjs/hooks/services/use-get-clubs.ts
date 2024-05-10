@@ -16,6 +16,8 @@ export const useGetClubs = () => {
     pageSize: 4,
   });
   const [data, setData] = React.useState<ClubDetails[]>([]);
+  const [noMoreResults, toggleNoMoreResults] = React.useReducer(prv => !prv, false);
+  const [emptyResults, toogleEmptyResults] = React.useReducer(prv => !prv, false);
   const [prevPagination, setPrevPagination] = React.useState<PaginationState | null>(null);
 
   const { refetch, error, isLoading, isFetching, isSuccess } = useScaffoldReadContract({
@@ -26,8 +28,16 @@ export const useGetClubs = () => {
 
   const load = React.useCallback(async () => {
     try {
-      const { data: result } = await refetch();
-      if (result) {
+      const { data: result, error } = await refetch();
+      if (error) {
+        throw error;
+      } else if (result == undefined) {
+        throw "unknown error";
+      } else if (data.length > 0 && result.length === 0) {
+        toggleNoMoreResults();
+      } else if (data.length === 0 && result.length === 0) {
+        toogleEmptyResults();
+      } else {
         setData(prv => [...prv, ...result]);
       }
     } catch (error) {
@@ -35,7 +45,7 @@ export const useGetClubs = () => {
       notification.error(getParsedError(error));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setData]);
+  }, [data.length, setData]);
 
   const debouncedLoad = debounce(load, 100);
 
@@ -64,6 +74,8 @@ export const useGetClubs = () => {
     deployedContractData,
     deployedContractLoading,
     handleLoadMore,
+    noMoreResults,
+    emptyResults,
     contractName,
     isFetching,
     isLoading,

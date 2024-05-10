@@ -1,6 +1,7 @@
 import * as React from "react";
 import Link from "next/link";
 import JoinButton from "../JoinClub";
+import { Card } from "../core/card";
 import { ProposalComponent } from "../proposal";
 import { Address } from "../scaffold-eth";
 import { useGetClub } from "~~/hooks/services/use-get-club";
@@ -40,7 +41,7 @@ export const ClubComponent = ({ id }: { id: number }) => {
     <div className={`grid grid-cols-1 lg:grid-cols-6 px-6 lg:px-10 lg:gap-12 w-full max-w-7xl my-0`}>
       <div className="col-span-5 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
         <div className="col-span-1 flex flex-col">
-          <div className="bg-base-100 border-base-300 border shadow-md shadow-secondary rounded-3xl px-6 lg:px-8 mb-6 space-y-1 py-4">
+          <Card>
             <div className="flex">
               <div className="flex flex-col gap-1">
                 <span className="">#{club.id.toString()}</span>
@@ -66,16 +67,14 @@ export const ClubComponent = ({ id }: { id: number }) => {
                 />
               </div>
             </div>
-          </div>
+          </Card>
         </div>
-        <div className="col-span-1 lg:col-span-2 flex flex-col gap-6">
+        <div className="col-span-1 lg:col-span-2 flex flex-col gap-3">
           <div className="z-10">
             <h1 className="font-bold text-3xl mb-4 lg:block">Proposals</h1>
-            <div className="bg-base-100 rounded-3xl shadow-md shadow-secondary border border-base-300 flex flex-col relative">
-              <div className="p-5 divide-y divide-base-300">
-                <CreateProposal id={club.id.toString()} />
-              </div>
-            </div>
+            <Card>
+              <CreateProposal id={club.id.toString()} />
+            </Card>
           </div>
           <div className="z-10">
             <ProposalComponent id={id} />
@@ -88,7 +87,7 @@ export const ClubComponent = ({ id }: { id: number }) => {
 
 const CreateProposal = ({ id }: { id: string }): React.JSX.Element => {
   return (
-    <div className="flex flex-col justify-between gap-x-3 gap-y-[10px] px-[20px] sm:flex-row md:px-0">
+    <div className="flex flex-col justify-between gap-x-3 gap-y-[10px] sm:flex-row ">
       <div className="w-full pr-0 md:max-w-[340px]">
         <label className="input input-bordered flex items-center gap-2">
           <input type="text" className="grow focus:outline-none" placeholder="Search" />
@@ -111,9 +110,6 @@ const CreateProposal = ({ id }: { id: string }): React.JSX.Element => {
           Create Proposal
         </span>
       </Link>
-      {/* <button className="bg-transparent border input-bordered hover:border-transparent rounded-full btn btn-outlin">
-        Create Proposal
-      </button> */}
     </div>
   );
 };
