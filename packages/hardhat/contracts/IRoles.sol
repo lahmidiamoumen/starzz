@@ -18,4 +18,6 @@ interface IRoles {
     function isAdmin(address account) external view returns (bool);
 
     function isFan(address account) external view returns (bool);
+
+    function getCsRole(uint256 clubId) external view returns (address);
 }

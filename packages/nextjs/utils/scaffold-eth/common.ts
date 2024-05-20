@@ -17,3 +17,5 @@ export function debounce<T extends (...args: any[]) => void>(func: T, delay: num
 export function isEqual(obj1: PaginationState, obj2: PaginationState | null) {
   return obj2 === null ? false : obj1.currentPage === obj2.currentPage && obj1.pageSize === obj2.pageSize;
 }
+
+export const getDate = (date: bigint) => (Number(date) > 0 ? new Date(Number(date) * 1000).toLocaleString() : "N/A");

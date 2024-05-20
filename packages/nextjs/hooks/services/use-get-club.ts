@@ -5,49 +5,59 @@ import { useDeployedContractInfo, useScaffoldReadContract } from "../scaffold-et
 import { ClubDetails } from "~~/types/club";
 import { getParsedError, notification } from "~~/utils/scaffold-eth";
 
-type Props = {
-  id: number;
-};
 const contractName = "Club";
+const retryCount = 3;
+const retryDelay = 1000;
 
-export const useGetClub = ({ id }: Props) => {
+export const useGetClub = ({ id }: { id: number }) => {
   const { data: deployedContractData, isLoading: deployedContractLoading } = useDeployedContractInfo(contractName);
-
-  const [data, setData] = React.useState<ClubDetails>();
-
+  const [data, setData] = React.useState<ClubDetails | null>(null);
   const { refetch, error, isLoading, isFetching, isSuccess, isFetched } = useScaffoldReadContract({
     functionName: "getClubDetails",
     contractName,
     args: [BigInt(id)],
   });
 
+  const isLoadingData = isLoading || deployedContractLoading;
+
+  const handleError = (error: Error) => {
+    console.error("Error fetching club details:", error);
+    notification.error(getParsedError(error));
+  };
+
   React.useEffect(() => {
     if (isFetching && error) {
-      notification.error(getParsedError(error));
+      handleError(error);
     }
   }, [error, isFetching]);
 
   React.useEffect(() => {
-    const load = async () => {
+    let retries = 0;
+    const fetchDataWithRetry = async () => {
       try {
-        const { data: result } = await refetch();
-        if (result) {
-          setData(result);
-        }
+        const { data } = await refetch();
+        setData(data ?? null);
       } catch (error) {
-        console.error("Error fetching clubs:", error);
-        notification.error(getParsedError(error));
+        handleError(error as Error);
+        if (retries < retryCount) {
+          retries++;
+          const timeoutId = setTimeout(() => {
+            fetchDataWithRetry();
+          }, retryDelay * retries);
+
+          return () => clearTimeout(timeoutId);
+        }
       }
     };
-    load();
+
+    fetchDataWithRetry();
   }, [refetch]);
 
   return {
     deployedContractData,
-    deployedContractLoading,
     contractName,
+    isLoading: isLoadingData,
     isFetching,
-    isLoading,
     isFetched,
     isSuccess,
     payload: data,

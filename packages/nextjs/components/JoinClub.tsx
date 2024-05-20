@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Button } from "./core/button";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
 type Status = "requested" | "member" | "nan";
@@ -39,11 +40,24 @@ const JoinButton = ({ clubId, status = "nan" }: Props): React.ReactNode => {
 
   return (
     action[status] ?? (
-      <button disabled={isPending || isSuccess} onClick={handleJoin} type="button" className="btn btn-secondary btn-sm">
+      <Button
+        className="btn-sm w-full"
+        variant={"outline"}
+        size={"sm"}
+        disabled={isPending || isSuccess}
+        onClick={handleJoin}
+      >
         {isPending && <span className="loading loading-spinner loading-sm"></span>}
         {isSuccess && !isPending && <span>Requested</span>}
         {!isSuccess && !isPending && <span>Join</span>}
-      </button>
+      </Button>
+      // <button
+      //   disabled={isPending || isSuccess}
+      //   onClick={handleJoin}
+      //   type="button"
+      //   className="w-full btn btn-secondary btn-sm"
+      // >
+      // </button>
     )
   );
 };

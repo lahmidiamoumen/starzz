@@ -35,16 +35,16 @@ contract Proposal {
 		uint256 votingEndTime;
 	}
 
-		struct ProposalPresnter {
-			uint256 proposalId;
-			address creator;
-			string title;
-			string description;
-			Choice[] choices;
-			Status status;
-			uint256 votingStartTime;
-			uint256 votingEndTime;
-		}
+	struct ProposalPresnter {
+		uint256 proposalId;
+		address creator;
+		string title;
+		string description;
+		Choice[] choices;
+		Status status;
+		uint256 votingStartTime;
+		uint256 votingEndTime;
+	}
 
 	mapping(address => mapping(uint256 => uint256)) private hasVoted;
 	mapping(uint256 => mapping(uint256 => ProposalRecord)) private _proposals;
@@ -275,7 +275,7 @@ contract Proposal {
 		if (length == 0) {
 			return (0, 0);
 		}
-		
+
 		uint256 totalPages = length / pageSize;
 		if (length % pageSize != 0) {
 			unchecked {
@@ -311,7 +311,7 @@ contract Proposal {
 		uint256 pageSize
 	) external view returns (ProposalPresnter[] memory) {
 		require(pageSize > 0 && pageSize <= 100, "Invalid page size number!");
-		require(page > 0 , "Invalid page number!");
+		require(page > 0, "Invalid page number!");
 		require(IClub(_clubs).isValidClubId(clubId), "Invalid club ID");
 		(uint256 startItemIndex, uint256 endItemIndex) = getPageCursor(
 			page,
@@ -325,13 +325,9 @@ contract Proposal {
 			return new ProposalPresnter[](0);
 		}
 
-		console.log(
-			startItemIndex,
-			endItemIndex,
+		ProposalPresnter[] memory pageProposals = new ProposalPresnter[](
 			itemCount
 		);
-
-		ProposalPresnter[] memory pageProposals = new ProposalPresnter[](itemCount);
 		uint256 j = itemCount - 1;
 		for (uint256 i = endItemIndex; i < startItemIndex; ) {
 			ProposalRecord memory proposal = _proposals[clubId][i];
@@ -365,15 +361,16 @@ contract Proposal {
 			"Invalid proposal ID"
 		);
 		ProposalRecord memory proposal = _proposals[clubId][proposalId];
-		return ProposalPresnter({
-			creator: proposal.creator,
-			title: proposal.title,
-			description: proposal.description,
-			choices: proposal.choices,
-			status: proposal.status,
-			votingStartTime: proposal.votingStartTime,
-			votingEndTime: proposal.votingEndTime,
-			proposalId: proposalId
-		});
+		return
+			ProposalPresnter({
+				creator: proposal.creator,
+				title: proposal.title,
+				description: proposal.description,
+				choices: proposal.choices,
+				status: proposal.status,
+				votingStartTime: proposal.votingStartTime,
+				votingEndTime: proposal.votingEndTime,
+				proposalId: proposalId
+			});
 	}
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ClubComponent } from "~~/components/club/ClubComponent";
+import { Proposals } from "~~/components/club/ClubComponent";
 
 type PageProps = {
   params: { id: number };
@@ -9,7 +9,7 @@ type PageProps = {
 
 const ClubPage = ({ params }: PageProps) => {
   const id = params?.id as number;
-  return <ClubComponent id={id} />;
+  return <Proposals id={id} />;
 };
 
 export default ClubPage;

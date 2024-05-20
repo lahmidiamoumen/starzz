@@ -6,10 +6,19 @@ import { normalize } from "viem/ens";
 import { useEnsAddress, useEnsAvatar, useEnsName } from "wagmi";
 import { CommonInputProps, InputBase, isENS } from "~~/components/scaffold-eth";
 
+export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
+
 /**
  * Address input with ENS name resolution
  */
-export const AddressInput = ({ value, name, placeholder, onChange, disabled }: CommonInputProps<Address | string>) => {
+export const AddressInput = ({
+  className,
+  value,
+  name,
+  placeholder,
+  onChange,
+  disabled,
+}: CommonInputProps<Address | string>) => {
   // Debounce the input to keep clean RPC calls when resolving ENS names
   // If the input is an address, we don't need to debounce it
   const [_debouncedValue] = useDebounceValue(value, 500);
@@ -85,6 +94,7 @@ export const AddressInput = ({ value, name, placeholder, onChange, disabled }: C
   return (
     <InputBase<Address>
       name={name}
+      className={className}
       placeholder={placeholder}
       error={ensAddress === null}
       value={value as Address}

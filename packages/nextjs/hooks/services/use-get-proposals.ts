@@ -4,8 +4,6 @@ import * as React from "react";
 import { useDeployedContractInfo, useScaffoldReadContract } from "../scaffold-eth";
 import { ProposalPresnter } from "~~/types/proposal";
 import { PaginationState } from "~~/types/utils";
-import { getParsedError, notification } from "~~/utils/scaffold-eth";
-import { debounce, isEqual } from "~~/utils/scaffold-eth/common";
 
 const contractName = "Proposal";
 
@@ -20,66 +18,37 @@ export const useGetProposals = ({ clubId }: Props) => {
     pageSize: 4,
   });
 
-  const [data, setData] = React.useState<ProposalPresnter[]>([]);
-  const [noMoreResults, toggleNoMoreResults] = React.useReducer(prv => !prv, false);
-  const [emptyResults, toogleEmptyResults] = React.useReducer(prv => !prv, false);
-  const [prevPagination, setPrevPagination] = React.useState<PaginationState | null>(null);
+  const [proposals, setProposals] = React.useState<ProposalPresnter[]>([]);
 
-  const { refetch, error, isLoading, isFetching, isSuccess } = useScaffoldReadContract({
+  const { refetch, error, isLoading, isFetching, isSuccess, data } = useScaffoldReadContract({
     functionName: "getProposals",
     contractName: contractName,
     args: [BigInt(clubId), BigInt(pagination.currentPage), BigInt(pagination.pageSize)],
   });
 
-  const load = React.useCallback(async () => {
-    try {
-      const { data: result, error } = await refetch();
-      if (error) {
-        throw error;
-      } else if (result == undefined) {
-        throw "unknown error";
-      } else if (data.length > 0 && result.length === 0) {
-        toggleNoMoreResults();
-      } else if (data.length === 0 && result.length === 0) {
-        toogleEmptyResults();
-      } else {
-        setData(prv => [...prv, ...result]);
-      }
-    } catch (error) {
-      console.error("Error fetching clubs:", error);
-      notification.error(getParsedError(error));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.length, setData]);
-
-  const debouncedLoad = debounce(load, 400);
-
   React.useEffect(() => {
-    if (!isLoading && error === null && !isEqual(pagination, prevPagination)) {
-      if (!prevPagination) {
-        debouncedLoad();
-      } else {
-        load();
-      }
-      setPrevPagination(pagination);
+    if (data !== undefined && data.length > 0) {
+      setProposals(prv => [...prv, ...data]);
     }
-  }, [pagination, isLoading, error, prevPagination, debouncedLoad, load]);
+  }, [data]);
 
   const handleLoadMore = () => {
     setPagination(prev => ({ ...prev, currentPage: prev.currentPage + 1 }));
   };
 
   return {
+    error,
+    refetch,
     deployedContractData,
     deployedContractLoading,
     handleLoadMore,
-    noMoreResults,
-    emptyResults,
+    noMoreResults: proposals.length > 0 && data?.length === 0,
+    emptyResults: data?.length === 0 && proposals.length === 0,
     contractName,
     isFetching,
     isLoading,
     isSuccess,
     pagination,
-    payload: data,
+    payload: proposals,
   };
 };

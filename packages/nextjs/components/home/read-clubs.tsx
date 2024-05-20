@@ -3,9 +3,12 @@
 import * as React from "react";
 import Link from "next/link";
 import JoinButton from "../JoinClub";
+import { Card, CardContent } from "../core/card";
+import { Map } from "../core/map";
 import { Address } from "../scaffold-eth";
 import type { NextPage } from "next";
 import { useGetClubs } from "~~/hooks/services/use-get-clubs";
+import { ClubDetails } from "~~/types/club";
 
 const ClubsList: NextPage = () => {
   const {
@@ -41,43 +44,45 @@ const ClubsList: NextPage = () => {
 
   return (
     <>
+      <div className="flex flex-col space-y-1">
+        <h3 className="font-semibold leading-none tracking-tight">Club Listing</h3>
+        <p className="text-sm text-muted-foreground">Join your favouriate clubs.</p>
+      </div>
       {clubs.length > 0 && (
-        <div className="scroll-smooth">
-          <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {clubs.map((item, index) => (
-              <div
-                key={index}
-                className="bg-base-100 border-base-300 border shadow-md shadow-secondary rounded-3xl px-6 lg:px-8 mb-6 space-y-1 py-4"
-              >
-                <div className="flex">
-                  <div className="flex flex-col gap-1">
-                    <div className="flex gap-1 items-center">
+        <div>
+          <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <Map<ClubDetails>
+              items={clubs}
+              renderItem={(item, index) => (
+                <Card key={index}>
+                  <CardContent>
+                    <div className="flex flex-col items-center">
                       <div className="flex items-center justify-center gap-1 truncate">
-                        <h2 className="mb-0 mt-0 !h-[30px] overflow-hidden pb-0 text-[22px]">
+                        <h2 className="m-0 !h-[30px] overflow-hidden p-0 text-[22px]">
                           <Link href={`/club/${item.id}`}>
                             <span className="font-bold">{item.name}</span>
                           </Link>
                         </h2>
                       </div>
+                      <Address address={item.creator} />
+                      <p className="my-0 text-sm mb-4">
+                        ID: <b>#{item.id.toString()}</b>{" "}
+                      </p>
+                      <JoinButton
+                        status={
+                          item.membershipRequestedOn !== BigInt(0)
+                            ? "requested"
+                            : item.joinedOn !== BigInt(0)
+                            ? "member"
+                            : "nan"
+                        }
+                        clubId={item.id}
+                      />
                     </div>
-                    <Address address={item.creator} />
-                    <p className="my-0 text-sm text-center mb-4">
-                      <span>ID: {item.id.toString()}</span>
-                    </p>
-                    <JoinButton
-                      status={
-                        item.membershipRequestedOn !== BigInt(0)
-                          ? "requested"
-                          : item.joinedOn !== BigInt(0)
-                          ? "member"
-                          : "nan"
-                      }
-                      clubId={item.id}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
+                  </CardContent>
+                </Card>
+              )}
+            />
           </div>
           <div className="flex justify-center mt-4">
             {!noMoreResults && clubs.length !== 0 && clubs.length % pagination.pageSize === 0 && (

@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     Club: {
-      address: "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44",
+      address: "0xc5a5C42992dECbae36851359345FE25997F5C42d",
       abi: [
         {
           inputs: [
@@ -372,6 +372,129 @@ const deployedContracts = {
         {
           inputs: [
             {
+              internalType: "uint256",
+              name: "page",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "pageSize",
+              type: "uint256",
+            },
+          ],
+          name: "getCsRoles",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "clubId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "string",
+                  name: "clubName",
+                  type: "string",
+                },
+                {
+                  internalType: "address",
+                  name: "cs",
+                  type: "address",
+                },
+              ],
+              internalType: "struct Club.CsRolePresenter[]",
+              name: "",
+              type: "tuple[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "page",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "pageSize",
+              type: "uint256",
+            },
+          ],
+          name: "getMembers",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "address",
+                  name: "member",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "ceatedAt",
+                  type: "uint256",
+                },
+              ],
+              internalType: "struct MemberRecord[]",
+              name: "",
+              type: "tuple[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "page",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "pageSize",
+              type: "uint256",
+            },
+          ],
+          name: "getMembershipRequests",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "address",
+                  name: "member",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "ceatedAt",
+                  type: "uint256",
+                },
+              ],
+              internalType: "struct MemberRecord[]",
+              name: "",
+              type: "tuple[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
               internalType: "address",
               name: "user",
               type: "address",
@@ -493,7 +616,7 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
-          name: "revokMembership",
+          name: "revokeMembership",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
@@ -505,7 +628,7 @@ const deployedContracts = {
       },
     },
     Proposal: {
-      address: "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
+      address: "0x67d269191c92Caf3cD7723F116c85e6E9bf55933",
       abi: [
         {
           inputs: [
@@ -1138,6 +1261,142 @@ const deployedContracts = {
         {
           inputs: [
             {
+              internalType: "uint256",
+              name: "page",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "pageSize",
+              type: "uint256",
+            },
+          ],
+          name: "getAdmins",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "",
+              type: "address[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getAdminsCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "page",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "pageSize",
+              type: "uint256",
+            },
+          ],
+          name: "getCSs",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "",
+              type: "address[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
+            },
+          ],
+          name: "getCsRole",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "page",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "pageSize",
+              type: "uint256",
+            },
+          ],
+          name: "getModerators",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "",
+              type: "address[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getModeratorsCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "getRole",
+          outputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
               internalType: "bytes32",
               name: "role",
               type: "bytes32",
@@ -1149,6 +1408,49 @@ const deployedContracts = {
               internalType: "bytes32",
               name: "",
               type: "bytes32",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "role",
+              type: "bytes32",
+            },
+            {
+              internalType: "uint256",
+              name: "index",
+              type: "uint256",
+            },
+          ],
+          name: "getRoleMember",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "role",
+              type: "bytes32",
+            },
+          ],
+          name: "getRoleMemberCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
             },
           ],
           stateMutability: "view",
@@ -1173,6 +1475,11 @@ const deployedContracts = {
               internalType: "address",
               name: "account",
               type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
             },
           ],
           name: "grantCSRole",
@@ -1445,19 +1752,22 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {
+        getCsRole: "contracts/IRoles.sol",
         isAdmin: "contracts/IRoles.sol",
         isAdminOrModerator: "contracts/IRoles.sol",
         isCS: "contracts/IRoles.sol",
         isFan: "contracts/IRoles.sol",
         isModerator: "contracts/IRoles.sol",
         isStaff: "contracts/IRoles.sol",
-        DEFAULT_ADMIN_ROLE: "@openzeppelin/contracts/access/AccessControl.sol",
-        getRoleAdmin: "@openzeppelin/contracts/access/AccessControl.sol",
-        grantRole: "@openzeppelin/contracts/access/AccessControl.sol",
-        hasRole: "@openzeppelin/contracts/access/AccessControl.sol",
-        renounceRole: "@openzeppelin/contracts/access/AccessControl.sol",
-        revokeRole: "@openzeppelin/contracts/access/AccessControl.sol",
-        supportsInterface: "@openzeppelin/contracts/access/AccessControl.sol",
+        DEFAULT_ADMIN_ROLE: "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
+        getRoleAdmin: "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
+        getRoleMember: "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
+        getRoleMemberCount: "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
+        grantRole: "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
+        hasRole: "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
+        renounceRole: "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
+        revokeRole: "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
+        supportsInterface: "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
       },
     },
   },

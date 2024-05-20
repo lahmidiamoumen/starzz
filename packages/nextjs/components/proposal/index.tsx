@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Card } from "../core/card";
+import { Card, CardContent } from "../core/card";
 import { Map } from "../core/map";
 import { Address } from "../scaffold-eth";
 import { useGetProposals } from "~~/hooks/services/use-get-proposals";
@@ -45,7 +45,7 @@ export const ProposalComponent = ({ id }: { id: number }) => {
 
   if (emptyResults) {
     return (
-      <div className="text-center text-gray-500">
+      <div className="text-center text-base-content">
         <p className="text-1xl mt-14">{`No record found!`}</p>
       </div>
     );
@@ -62,31 +62,33 @@ export const ProposalComponent = ({ id }: { id: number }) => {
         renderItem={(proposal, index) => (
           <div key={index} className="z-10">
             <Card>
-              <div className="divide-y divide-base-300">
-                <div className="flex justify-between">
-                  <Address address={proposal.creator} />
-                  <span className="bg-gray-100 text-gray-800 text-sm font-medium me-2 px-3 py-1 rounded-full dark:bg-gray-700 dark:text-gray-300">
-                    {VotingStatus.hasOwnProperty(proposal.status)
-                      ? VotingStatus[proposal.status as ProposalStatus]
-                      : "N/A"}
-                  </span>
+              <CardContent>
+                <div className="divide-y divide-base-300">
+                  <div className="flex justify-between">
+                    <Address address={proposal.creator} />
+                    <span className="bg-gray-100 text-gray-800 text-sm font-medium me-2 px-3 py-1 rounded-full dark:bg-gray-700 dark:text-gray-300">
+                      {VotingStatus.hasOwnProperty(proposal.status)
+                        ? VotingStatus[proposal.status as ProposalStatus]
+                        : "N/A"}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <Link href={`/club/${id}/proposal/${proposal.proposalId}`}>
-                  <span className="mt-2 font-bold text-2xl relative break-words pr-[80px] leading-[32px]">
-                    {proposal.title}
-                  </span>
-                  <p className="line-clamp-2 break-words text-md font-semibold">{proposal.description}</p>
-                </Link>
-                <span>Ends In {getDate(proposal.votingStartTime)}</span>
-                {/* <div>
-                  <Map<ChoiceRecord>
-                    items={proposal.choices as unknown as ChoiceRecord[]}
-                    renderItem={choice => <div className="">{choice.description}</div>}
-                  />
-                </div> */}
-              </div>
+                <div>
+                  <Link href={`/club/${id}/proposal/${proposal.proposalId}`}>
+                    <span className="mt-2 font-bold text-2xl relative break-words pr-[80px] leading-[32px]">
+                      {proposal.title}
+                    </span>
+                    <p className="line-clamp-2 break-words text-md font-semibold">{proposal.description}</p>
+                  </Link>
+                  <span>Ends In {getDate(proposal.votingStartTime)}</span>
+                  {/* <div>
+                    <Map<ChoiceRecord>
+                      items={proposal.choices as unknown as ChoiceRecord[]}
+                      renderItem={choice => <div className="">{choice.description}</div>}
+                    />
+                  </div> */}
+                </div>
+              </CardContent>
             </Card>
           </div>
         )}

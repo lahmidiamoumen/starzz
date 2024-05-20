@@ -1,21 +1,25 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0 <0.9.0;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./Roles.sol";
 import "./IClub.sol";
+import "./membership/MemberManager.sol";
+import "./membership/MemberRecord.sol";
 
 import "hardhat/console.sol";
 
 contract Club is IClub {
 	using Counters for Counters.Counter;
+	Counters.Counter private _clubIds;
+
+	using MemberManager for MemberManager.MemberData;
+	MemberManager.MemberData private _members;
+	MemberManager.MemberData private _membershipRequests;
+
 	address private immutable _roles;
 
-	Counters.Counter private _clubIds;
 	mapping(address => uint256) public csToClub;
-	mapping(address => mapping(uint256 => uint256)) private _isMember;
-	mapping(address => mapping(uint256 => uint256))
-		private _membershipRequestedAt;
 
 	event MembershipRequested(address indexed user, uint256 indexed clubId);
 	event MembershipApproved(address indexed user, uint256 indexed clubId);
@@ -26,6 +30,12 @@ contract Club is IClub {
 		string name;
 		address creator;
 		uint256 createdOn;
+	}
+
+	struct CsRolePresenter {
+		uint256 clubId;
+		string clubName;
+		address cs;
 	}
 
 	struct ClubPresenter {
@@ -47,7 +57,7 @@ contract Club is IClub {
 	}
 
 	modifier onlyMember(uint256 clubId) {
-		require(_isMember[_msgSender()][clubId] > 0, "Caller is not a member");
+		require(_members.isMember(_msgSender(), clubId), "Caller is not a member");
 		_;
 	}
 
@@ -75,25 +85,40 @@ contract Club is IClub {
 		_;
 	}
 
-	function getMember(
+	function getMemberID(
 		address user,
 		uint256 clubId
 	) internal view returns (uint256) {
-		return _isMember[user][clubId];
+		return _members.getMemberID(user, clubId);
 	}
 
-	function getMembershipRequestDate(
+	function getMembershipRequestID(
 		address user,
 		uint256 clubId
 	) internal view returns (uint256) {
-		return _membershipRequestedAt[user][clubId];
+		return _membershipRequests.getMemberID(user, clubId);
+	}
+		function getMember(
+		address user,
+		uint256 clubId
+	) internal view returns (MemberRecord memory) {
+		return _members.getMember(user, clubId);
+	}
+
+	function getMembershipRequest(
+		address user,
+		uint256 clubId
+	) internal view returns (MemberRecord memory) {
+		return _membershipRequests.getMember(user, clubId);
 	}
 
 	function isMember(
 		address user,
 		uint256 clubId
 	) external view returns (bool) {
-		return getMember(user, clubId) > 0;
+		require(user != address(0), "Invalid address");
+		require(clubId <= _clubIds.current(), "Invalid club ID");
+		return _members.isMember(user, clubId);
 	}
 
 	function _msgSender() internal view returns (address) {
@@ -121,13 +146,14 @@ contract Club is IClub {
 
 	function joinClub(uint256 clubId) external onlyNoStaffPrivileges {
 		require(clubId <= _clubIds.current(), "Invalid club ID");
-		require(_isMember[_msgSender()][clubId] == 0, "User already a member");
+		require(getMemberID(_msgSender(), clubId) == 0, "User already a member");
 		require(
-			getMembershipRequestDate(_msgSender(), clubId) == 0,
+			getMembershipRequestID(_msgSender(), clubId) == 0,
 			"Membership request already submitted"
 		);
 
-		_membershipRequestedAt[_msgSender()][clubId] = block.timestamp;
+		_membershipRequests.grantMembership(_msgSender(), clubId);
+
 		emit MembershipRequested(_msgSender(), clubId);
 	}
 
@@ -135,18 +161,20 @@ contract Club is IClub {
 		address user,
 		uint256 clubId
 	) external onlyStaffPrivileges {
+		require(user != address(0), "Invalid address");
 		require(clubId <= _clubIds.current(), "Invalid club ID");
 		require(
-			getMembershipRequestDate(user, clubId) > 0,
+			getMembershipRequestID(user, clubId) > 0,
 			"User has not requested membership"
 		);
 		require(
-			getMember(user, clubId) == 0,
+			getMemberID(user, clubId) == 0,
 			"User is already a member in the club"
 		);
 
-		_isMember[user][clubId] = block.timestamp;
-		_membershipRequestedAt[user][clubId] = 0;
+		_members.grantMembership(user, clubId);
+		_membershipRequests.revokeMembership(user, clubId);
+
 		emit MembershipApproved(user, clubId);
 	}
 
@@ -154,24 +182,26 @@ contract Club is IClub {
 		address user,
 		uint256 clubId
 	) external onlyStaffPrivileges {
+		require(user != address(0), "Invalid address");
 		require(clubId <= _clubIds.current(), "Invalid club ID");
 		require(
-			getMembershipRequestDate(user, clubId) > 0,
+			getMembershipRequestID(user, clubId) > 0,
 			"User has not requested membership"
 		);
 
-		_membershipRequestedAt[user][clubId] = 0;
+		_membershipRequests.revokeMembership(user, clubId);
 		emit MembershipRejected(user, clubId);
 	}
 
-	function revokMembership(
+	function revokeMembership(
 		address user,
 		uint256 clubId
 	) external onlyStaffPrivileges {
+		require(user != address(0), "Invalid address");
 		require(clubId <= _clubIds.current(), "Invalid club ID");
-		require(getMember(user, clubId) > 0, "User is not member in the club");
+		require(_members.getMemberID(user, clubId) > 0, "User is not member in the club");
 
-		_isMember[user][clubId] = 0;
+		_members.revokeMembership(user, clubId);
 		emit MembershipRejected(user, clubId);
 	}
 
@@ -181,16 +211,16 @@ contract Club is IClub {
 		require(clubId <= _clubIds.current(), "Invalid club ID");
 		ClubDetails memory club = _clubs[clubId];
 		address user = _msgSender();
-		uint256 memberJoinedOn = getMember(user, club.id);
-		uint256 membershipRequestedAt = getMembershipRequestDate(user, club.id);
+		MemberRecord memory memberJoinedOn = getMember(user, club.id);
+		MemberRecord memory membershipRequestedAt = getMembershipRequest(user, club.id);
 		return
 			ClubPresenter({
 				id: club.id,
 				name: club.name,
 				creator: club.creator,
 				createdOn: club.createdOn,
-				joinedOn: memberJoinedOn,
-				membershipRequestedOn: membershipRequestedAt
+				joinedOn: memberJoinedOn.ceatedAt,
+				membershipRequestedOn: membershipRequestedAt.ceatedAt
 			});
 	}
 
@@ -198,15 +228,16 @@ contract Club is IClub {
 		address user,
 		uint256 clubId
 	) external view onlyStaffPrivileges returns (bool) {
+		require(user != address(0), "Invalid address");
 		require(clubId <= _clubIds.current(), "Invalid club ID");
-		return getMembershipRequestDate(user, clubId) > 0;
+		return getMembershipRequestID(user, clubId) > 0;
 	}
 
 	function didIRequestedMembership(
 		uint256 clubId
 	) external view returns (bool) {
 		require(clubId <= _clubIds.current(), "Invalid club ID");
-		return getMembershipRequestDate(_msgSender(), clubId) > 0;
+		return getMembershipRequestID(_msgSender(), clubId) > 0;
 	}
 
 	function getClubCreator(
@@ -219,19 +250,58 @@ contract Club is IClub {
 	function leaveClub(uint256 clubId) external {
 		require(clubId <= _clubIds.current(), "Invalid club ID");
 		require(
-			getMember(_msgSender(), clubId) > 0,
+			getMemberID(_msgSender(), clubId) > 0,
 			"User is not member in the club"
 		);
-		_isMember[_msgSender()][clubId] = 0;
+
+		_members.revokeMembership(_msgSender(), clubId);
+
 		emit LeftClub(_msgSender(), clubId);
+	}
+
+	function getPageMemberCursor(
+		uint256 page,
+		uint256 pageSize,
+		uint256 length
+	) internal pure returns (uint256, uint256) {
+		if (length == 0) {
+			return (0, 0);
+		}
+
+		uint256 totalPages = length / pageSize;
+		if (length % pageSize != 0) {
+			unchecked {
+				++totalPages;
+			}
+		}
+
+		if (page > totalPages) {
+			return (0, 0);
+		}
+
+		uint256 startItemIndex;
+		uint256 endItemIndex;
+
+		if (((page - 1) * pageSize) < length) {
+			unchecked {
+				startItemIndex = length - ((page - 1) * pageSize);
+			}
+		} else {
+			startItemIndex = length;
+		}
+
+		if (startItemIndex > pageSize) {
+			endItemIndex = startItemIndex - pageSize;
+		}
+
+		return (startItemIndex + 1, endItemIndex + 1);
 	}
 
 	function getPageCursor(
 		uint256 page,
-		uint256 pageSize
-	) internal view returns (uint256, uint256) {
-		uint256 length = _clubIds.current();
-
+		uint256 pageSize,
+		uint256 length
+	) internal pure returns (uint256, uint256) {
 		if (length == 0) {
 			return (0, 0);
 		}
@@ -265,6 +335,98 @@ contract Club is IClub {
 		return (startItemIndex, endItemIndex);
 	}
 
+	function getMembers(
+		uint256 clubId,
+		uint256 page,
+		uint256 pageSize
+	) external view returns (MemberRecord[] memory) {
+		(uint256 startItemIndex, uint256 endItemIndex) = getPageMemberCursor(
+			page,
+			pageSize,
+			_members.current(clubId)
+		);
+
+		uint256 itemCount = startItemIndex - endItemIndex;
+		if (itemCount < 1) {
+			return new MemberRecord[](0);
+		}
+
+		MemberRecord[] memory pageClubs = new MemberRecord[](itemCount);
+		uint256 j = itemCount - 1;
+		for (uint256 i = endItemIndex; i < startItemIndex; ) {
+			pageClubs[j] = _members.getMemberById(i, clubId);
+			unchecked {
+				++i;
+				--j;
+			}
+		}
+
+		return pageClubs;
+	}
+
+	function getMembershipRequests(
+		uint256 clubId,
+		uint256 page,
+		uint256 pageSize
+	) external view returns (MemberRecord[] memory) {
+		(uint256 startItemIndex, uint256 endItemIndex) = getPageMemberCursor(
+			page,
+			pageSize,
+			_membershipRequests.current(clubId)
+		);
+
+		uint256 itemCount = startItemIndex - endItemIndex;
+		if (itemCount < 1) {
+			return new MemberRecord[](0);
+		}
+
+		MemberRecord[] memory pageClubs = new MemberRecord[](itemCount);
+		uint256 j = itemCount - 1;
+		for (uint256 i = endItemIndex; i < startItemIndex; ) {
+			pageClubs[j] = _membershipRequests.getMemberById(i, clubId);
+			unchecked {
+				++i;
+				--j;
+			}
+		}
+
+		return pageClubs;
+	}
+
+	function getCsRoles(
+		uint256 page,
+		uint256 pageSize
+	) external view returns (CsRolePresenter[] memory) {
+		(uint256 startItemIndex, uint256 endItemIndex) = getPageCursor(
+			page,
+			pageSize,
+			_clubIds.current()
+		);
+
+		uint256 itemCount = startItemIndex - endItemIndex;
+		if (itemCount < 1) {
+			return new CsRolePresenter[](0);
+		}
+
+		CsRolePresenter[] memory pageClubs = new CsRolePresenter[](itemCount);
+		uint256 j = itemCount - 1;
+		for (uint256 i = endItemIndex; i < startItemIndex; ) {
+			ClubDetails memory club = _clubs[i];
+
+			pageClubs[j] = CsRolePresenter({
+				clubId: club.id,
+				clubName: club.name,
+				cs: IRoles(_roles).getCsRole(club.id)
+			});
+			unchecked {
+				++i;
+				--j;
+			}
+		}
+
+		return pageClubs;
+	}
+
 	function getClubs(
 		uint256 page,
 		uint256 pageSize
@@ -273,7 +435,8 @@ contract Club is IClub {
 		require(page > 0 , "Invalid page number!");
 		(uint256 startItemIndex, uint256 endItemIndex) = getPageCursor(
 			page,
-			pageSize
+			pageSize,
+			_clubIds.current()
 		);
 
 		uint256 itemCount = startItemIndex - endItemIndex;
@@ -286,8 +449,8 @@ contract Club is IClub {
 		uint256 j = itemCount - 1;
 		for (uint256 i = endItemIndex; i < startItemIndex; ) {
 			ClubDetails memory club = _clubs[i];
-			uint256 memberJoinedOn = getMember(user, club.id);
-			uint256 membershipRequestedAt = getMembershipRequestDate(
+			uint256 memberJoinedOn = getMemberID(user, club.id);
+			uint256 membershipRequestedAt = getMembershipRequestID(
 				user,
 				club.id
 			);
