@@ -7,10 +7,21 @@ import { AddressInput } from "~~/components/scaffold-eth";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { AddressType } from "~~/types/abitype/abi";
 
-export const GrantCsRoles = () => {
+type Props = {
+  clubId: bigint | null;
+};
+
+export const GrantCsRoles = (props: Props) => {
+  const { clubId: selectedClub } = props;
   const { isPending, writeContractAsync } = useScaffoldWriteContract("Roles");
   const [inputAddress, setInputAddress] = useState<AddressType>("");
   const [clubId, setClubId] = useState<string>("");
+
+  React.useEffect(() => {
+    if (selectedClub) {
+      setClubId(selectedClub.toString());
+    }
+  }, [selectedClub]);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

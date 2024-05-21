@@ -22,9 +22,18 @@ export const useGetModerators = () => {
     args: [BigInt(pagination.currentPage), BigInt(pagination.pageSize)],
   });
 
+  const moderatorSet = React.useRef<Set<string>>(new Set());
   React.useEffect(() => {
     if (data !== undefined && data.length > 0) {
-      setModerators(prv => [...prv, ...data]);
+      const newClubs = data.filter(moderator => !moderatorSet.current.has(moderator));
+
+      if (newClubs.length > 0) {
+        const newClubIds = new Set(moderatorSet.current);
+        newClubs.forEach(moderator => newClubIds.add(moderator));
+
+        setModerators(prevClubs => [...prevClubs, ...newClubs]);
+        moderatorSet.current = newClubIds;
+      }
     }
   }, [data]);
 

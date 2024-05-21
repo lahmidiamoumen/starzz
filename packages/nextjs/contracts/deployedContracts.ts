@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     Club: {
-      address: "0xc5a5C42992dECbae36851359345FE25997F5C42d",
+      address: "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
       abi: [
         {
           inputs: [
@@ -628,7 +628,7 @@ const deployedContracts = {
       },
     },
     Proposal: {
-      address: "0x67d269191c92Caf3cD7723F116c85e6E9bf55933",
+      address: "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
       abi: [
         {
           inputs: [
@@ -1079,7 +1079,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     Roles: {
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      address: "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
       abi: [
         {
           inputs: [
@@ -1606,6 +1606,30 @@ const deployedContracts = {
               name: "account",
               type: "address",
             },
+            {
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
+            },
+          ],
+          name: "isCSOn",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
           ],
           name: "isFan",
           outputs: [
@@ -1756,6 +1780,7 @@ const deployedContracts = {
         isAdmin: "contracts/IRoles.sol",
         isAdminOrModerator: "contracts/IRoles.sol",
         isCS: "contracts/IRoles.sol",
+        isCSOn: "contracts/IRoles.sol",
         isFan: "contracts/IRoles.sol",
         isModerator: "contracts/IRoles.sol",
         isStaff: "contracts/IRoles.sol",

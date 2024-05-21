@@ -27,9 +27,18 @@ export const useGetMembers = ({ clubId }: Props) => {
     args: [BigInt(clubId), BigInt(pagination.currentPage), BigInt(pagination.pageSize)],
   });
 
+  const membersIds = React.useRef<Set<string>>(new Set());
   React.useEffect(() => {
     if (data !== undefined && data.length > 0) {
-      setMembershipRequests(prv => [...prv, ...data]);
+      const newClubs = data.filter(club => !membersIds.current.has(club.member));
+
+      if (newClubs.length > 0) {
+        const newClubIds = new Set(membersIds.current);
+        newClubs.forEach(club => newClubIds.add(club.member));
+
+        setMembershipRequests(prevClubs => [...prevClubs, ...newClubs]);
+        membersIds.current = newClubIds;
+      }
     }
   }, [data]);
 

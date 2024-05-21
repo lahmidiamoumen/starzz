@@ -69,9 +69,10 @@ contract Club is IClub {
 		_;
 	}
 
-	modifier onlyStaffPrivileges() {
+	modifier onlyCsRole(uint256 clubId) {
 		require(
-			IRoles(_roles).isStaff(_msgSender()),
+			IRoles(_roles).isAdminOrModerator(_msgSender()) ||
+			IRoles(_roles).isCSOn(_msgSender(), clubId),
 			"Roles: caller is not a staff"
 		);
 		_;
@@ -160,7 +161,7 @@ contract Club is IClub {
 	function approveMembership(
 		address user,
 		uint256 clubId
-	) external onlyStaffPrivileges {
+	) external onlyCsRole(clubId) {
 		require(user != address(0), "Invalid address");
 		require(clubId <= _clubIds.current(), "Invalid club ID");
 		require(
@@ -181,7 +182,7 @@ contract Club is IClub {
 	function rejectMembership(
 		address user,
 		uint256 clubId
-	) external onlyStaffPrivileges {
+	) external onlyCsRole(clubId) {
 		require(user != address(0), "Invalid address");
 		require(clubId <= _clubIds.current(), "Invalid club ID");
 		require(
@@ -196,7 +197,7 @@ contract Club is IClub {
 	function revokeMembership(
 		address user,
 		uint256 clubId
-	) external onlyStaffPrivileges {
+	) external onlyCsRole(clubId) {
 		require(user != address(0), "Invalid address");
 		require(clubId <= _clubIds.current(), "Invalid club ID");
 		require(_members.getMemberID(user, clubId) > 0, "User is not member in the club");
@@ -227,7 +228,7 @@ contract Club is IClub {
 	function hasRequestedMembership(
 		address user,
 		uint256 clubId
-	) external view onlyStaffPrivileges returns (bool) {
+	) external view onlyCsRole(clubId) returns (bool) {
 		require(user != address(0), "Invalid address");
 		require(clubId <= _clubIds.current(), "Invalid club ID");
 		return getMembershipRequestID(user, clubId) > 0;

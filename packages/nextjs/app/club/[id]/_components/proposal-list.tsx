@@ -2,6 +2,7 @@ import { ComponentProps } from "react";
 import Link from "next/link";
 import { Badge } from "~~/components/core/badge";
 import { Map } from "~~/components/core/map";
+import { Skeleton } from "~~/components/core/skeleton";
 import { Address } from "~~/components/scaffold-eth";
 import { useGetProposals } from "~~/hooks/services/use-get-proposals";
 import { ProposalPresnter, VotingStatus } from "~~/types/proposal";
@@ -20,9 +21,7 @@ enum ProposalStatus {
 
 export function ProposalsList({ clubId }: ProposalsListProps) {
   const {
-    contractName: proposalContract,
     deployedContractLoading,
-    deployedContractData,
     payload: proposals,
     isLoading,
     pagination,
@@ -35,16 +34,10 @@ export function ProposalsList({ clubId }: ProposalsListProps) {
 
   if (deployedContractLoading) {
     return (
-      <div className="text-center mt-14">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    );
-  }
-
-  if (!deployedContractData) {
-    return (
-      <div className="text-center">
-        <p className="text-1xl mt-14">{`No contract found by the name of "${proposalContract}"!`}</p>
+      <div className="text-center mt-5 flex flex-col gap-3">
+        <Skeleton className="h-[140px] w-full rounded-xl" />
+        <Skeleton className="h-[140px] w-full rounded-xl" />
+        <Skeleton className="h-[140px] w-full rounded-xl" />
       </div>
     );
   }
@@ -55,10 +48,6 @@ export function ProposalsList({ clubId }: ProposalsListProps) {
         <p className="text-1xl mt-14">{`No record found!`}</p>
       </div>
     );
-  }
-
-  if (!proposalContract) {
-    return <p className="text-3xl mt-14 text-gray-500">No contract found by the name of Propoasl on chain!</p>;
   }
 
   return (

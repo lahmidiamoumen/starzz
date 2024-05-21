@@ -13,16 +13,25 @@ export const useGetCsRoles = () => {
     currentPage: 1,
     pageSize: 4,
   });
-  const [clubs, setClubs] = React.useState<CsRecord[]>([]);
+  const [csRoles, setCsRoles] = React.useState<CsRecord[]>([]);
   const { refetch, error, isLoading, isFetching, isSuccess, data } = useScaffoldReadContract({
     functionName: "getCsRoles",
     contractName: "Club",
     args: [BigInt(pagination.currentPage), BigInt(pagination.pageSize)],
   });
 
+  const clubIds = React.useRef<Set<bigint>>(new Set());
   React.useEffect(() => {
     if (data !== undefined && data.length > 0) {
-      setClubs(prv => [...prv, ...data]);
+      const newClubs = data.filter(club => !clubIds.current.has(club.clubId));
+
+      if (newClubs.length > 0) {
+        const newClubIds = new Set(clubIds.current);
+        newClubs.forEach(club => newClubIds.add(club.clubId));
+
+        setCsRoles(prevClubs => [...prevClubs, ...newClubs]);
+        clubIds.current = newClubIds;
+      }
     }
   }, [data]);
 
@@ -36,13 +45,13 @@ export const useGetCsRoles = () => {
     refetch,
     error,
     deployedContractLoading,
-    noMoreResults: clubs.length > 0 && data?.length === 0,
-    emptyResults: data?.length === 0 && clubs.length === 0,
+    noMoreResults: csRoles.length > 0 && data?.length === 0,
+    emptyResults: data?.length === 0 && csRoles.length === 0,
     contractName,
     isFetching,
     isLoading,
     isSuccess,
     pagination,
-    payload: clubs,
+    payload: csRoles,
   };
 };

@@ -2,22 +2,28 @@
 
 import * as React from "react";
 import JoinButton from "~~/components/JoinClub";
+import { Skeleton } from "~~/components/core/skeleton";
 import { Address } from "~~/components/scaffold-eth";
+import { useRole } from "~~/hooks/context/use-context-role";
 import { useGetClub } from "~~/hooks/services/use-get-club";
 
 export const ClubCard = ({ id }: { id: number }) => {
-  const { contractName, deployedContractData, payload: club, isLoading, isSuccess } = useGetClub({ id });
+  const { contractName, payload: club, isLoading, isSuccess } = useGetClub({ id });
+
+  const { role } = useRole();
 
   if (isLoading || (isSuccess && !club)) {
     return (
-      <div className="mt-14 flex flex-col items-center">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div className="flex items-center space-x-4">
+        <Skeleton className="h-12 w-12" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-[250px]" />
+          <Skeleton className="h-4 w-[200px]" />
+          <Skeleton className="h-4 w-[250px]" />
+          <Skeleton className="h-4 w-[200px]" />
+        </div>
       </div>
     );
-  }
-
-  if (!deployedContractData) {
-    return <p className="text-3xl mt-14">{`No contract found by the name of "${contractName}"!`}</p>;
   }
 
   if (club === null) {
@@ -34,18 +40,24 @@ export const ClubCard = ({ id }: { id: number }) => {
       <span>#{club.id.toString()}</span>
       <span className="font-bold">{club.name}</span>
       <Address address={club.creator} />
-      <div className="flex gap-1 items-center mt-2">
-        <span className="text-sm">Joined On:</span>
-        <small className="px-0">{joinedOn}</small>
-      </div>
-      <div className="flex gap-1 items-center pb-3">
-        <span className="text-sm">Requested On:</span>
-        <small className="px-0">{requestedOn}</small>
-      </div>
-      <JoinButton
-        status={club.membershipRequestedOn !== BigInt(0) ? "requested" : club.joinedOn !== BigInt(0) ? "member" : "nan"}
-        clubId={club.id}
-      />
+      {role && !["ADMIN", "MODERATOR", "CS"].includes(role) && (
+        <>
+          <div className="flex gap-1 items-center mt-2">
+            <span className="text-sm">Joined On:</span>
+            <small className="px-0">{joinedOn}</small>
+          </div>
+          <div className="flex gap-1 items-center pb-3">
+            <span className="text-sm">Requested On:</span>
+            <small className="px-0">{requestedOn}</small>
+          </div>
+          <JoinButton
+            status={
+              club.membershipRequestedOn !== BigInt(0) ? "requested" : club.joinedOn !== BigInt(0) ? "member" : "nan"
+            }
+            clubId={club.id}
+          />
+        </>
+      )}
     </div>
   );
 };

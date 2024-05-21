@@ -27,11 +27,29 @@ export const useGetMembershipRequests = ({ clubId }: Props) => {
     args: [BigInt(clubId), BigInt(pagination.currentPage), BigInt(pagination.pageSize)],
   });
 
+  const membersIds = React.useRef<Set<string>>(new Set());
+
   React.useEffect(() => {
     if (data !== undefined && data.length > 0) {
-      setMembershipRequests(prv => [...prv, ...data]);
+      const newRequests = data.filter(request => !membersIds.current.has(request.member));
+
+      const deletedRequests = membershipRequests.filter(
+        request => !data.some(newRequest => newRequest.member === request.member),
+      );
+
+      if (newRequests.length > 0 || deletedRequests.length > 0) {
+        const newMembersSet = new Set(membersIds.current);
+        newRequests.forEach(request => newMembersSet.add(request.member));
+        deletedRequests.forEach(request => newMembersSet.delete(request.member));
+
+        setMembershipRequests([
+          ...membershipRequests.filter(request => !deletedRequests.includes(request)),
+          ...newRequests,
+        ]);
+        membersIds.current = newMembersSet;
+      }
     }
-  }, [data]);
+  }, [data, membershipRequests]);
 
   const handleLoadMore = () => {
     setPagination(prev => ({ ...prev, currentPage: prev.currentPage + 1 }));

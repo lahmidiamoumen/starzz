@@ -26,9 +26,18 @@ export const useGetProposals = ({ clubId }: Props) => {
     args: [BigInt(clubId), BigInt(pagination.currentPage), BigInt(pagination.pageSize)],
   });
 
+  const proposalsIds = React.useRef<Set<bigint>>(new Set());
   React.useEffect(() => {
     if (data !== undefined && data.length > 0) {
-      setProposals(prv => [...prv, ...data]);
+      const newClubs = data.filter(club => !proposalsIds.current.has(club.proposalId));
+
+      if (newClubs.length > 0) {
+        const newClubIds = new Set(proposalsIds.current);
+        newClubs.forEach(club => newClubIds.add(club.proposalId));
+
+        setProposals(prevClubs => [...prevClubs, ...newClubs]);
+        proposalsIds.current = newClubIds;
+      }
     }
   }, [data]);
 

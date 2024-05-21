@@ -12,8 +12,16 @@ type Props = {
 };
 
 const action = {
-  requested: <button className="btn btn-outlin btn-sm no-animation">Requested</button>,
-  member: <button className="btn btn-outline btn-secondary btn-sm">Joined</button>,
+  requested: (
+    <Button className="btn-sm w-full" variant={"outline"} size={"sm"}>
+      Requested
+    </Button>
+  ),
+  member: (
+    <Button className="btn-sm w-full" variant={"outline"} size={"sm"}>
+      Joined
+    </Button>
+  ),
   nan: undefined,
 };
 
@@ -51,13 +59,6 @@ const JoinButton = ({ clubId, status = "nan" }: Props): React.ReactNode => {
         {isSuccess && !isPending && <span>Requested</span>}
         {!isSuccess && !isPending && <span>Join</span>}
       </Button>
-      // <button
-      //   disabled={isPending || isSuccess}
-      //   onClick={handleJoin}
-      //   type="button"
-      //   className="w-full btn btn-secondary btn-sm"
-      // >
-      // </button>
     )
   );
 };

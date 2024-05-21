@@ -13,6 +13,7 @@ export const useGetClubs = () => {
     currentPage: 1,
     pageSize: 4,
   });
+
   const [clubs, setClubs] = React.useState<ClubDetails[]>([]);
   const { refetch, error, isLoading, isFetching, isSuccess, data } = useScaffoldReadContract({
     functionName: "getClubs",
@@ -20,9 +21,18 @@ export const useGetClubs = () => {
     args: [BigInt(pagination.currentPage), BigInt(pagination.pageSize)],
   });
 
+  const clubIds = React.useRef<Set<bigint>>(new Set());
   React.useEffect(() => {
     if (data !== undefined && data.length > 0) {
-      setClubs(prv => [...prv, ...data]);
+      const newClubs = data.filter(club => !clubIds.current.has(club.id));
+
+      if (newClubs.length > 0) {
+        const newClubIds = new Set(clubIds.current);
+        newClubs.forEach(club => newClubIds.add(club.id));
+
+        setClubs(prevClubs => [...prevClubs, ...newClubs]);
+        clubIds.current = newClubIds;
+      }
     }
   }, [data]);
 

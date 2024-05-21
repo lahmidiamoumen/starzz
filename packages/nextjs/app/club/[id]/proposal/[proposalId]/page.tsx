@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { BackButton } from "~~/app/blockexplorer/_components";
+import { Button } from "~~/components/core/button";
 import { Card, CardContent, CardTitle } from "~~/components/core/card";
 import { Map } from "~~/components/core/map";
 import { Address } from "~~/components/scaffold-eth";
@@ -77,9 +78,19 @@ const ShowProposal = ({ params }: PageProps) => {
                     )}
                   />
                 </div>
-                <button disabled={selectedChoice === null} className="mt-5 btn btn-primary">
-                  Vote
-                </button>
+                <div className="flex items-end">
+                  {/* <Label htmlFor="mute" className="flex items-center gap-2 text-xs font-normal">
+                    <Switch id="mute" aria-label="Mute thread" /> Mute this thread
+                  </Label> */}
+                  <Button
+                    disabled={selectedChoice === null}
+                    onClick={e => e.preventDefault()}
+                    size="sm"
+                    className="mt-3 btn btn-sm ml-auto"
+                  >
+                    Vote
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>

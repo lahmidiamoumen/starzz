@@ -1,7 +1,7 @@
 import * as React from "react";
 import Link from "next/link";
-import { Card, CardContent } from "../core/card";
 import { ProposalsList } from "~~/app/club/[id]/_components/proposal-list";
+import { Card, CardContent } from "~~/components/core/card";
 
 export const Proposals = ({ id }: { id: number }) => {
   return (

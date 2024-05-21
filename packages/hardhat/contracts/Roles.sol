@@ -43,9 +43,9 @@ contract Roles is IRoles, AccessControlEnumerable {
 		_;
 	}
 
-	modifier onlyCS() {
+	modifier onlyCS(uint256 clubId) {
 		require(
-			hasRole(CS_ROLE, _msgSender()),
+			hasRole(CS_ROLE, _msgSender()) && clubIdToCs[clubId] == _msgSender(),
 			"Caller is not a CS for any club"
 		);
 		_;
@@ -141,6 +141,10 @@ contract Roles is IRoles, AccessControlEnumerable {
 
 		revokeRole(CS_ROLE, account);
 		emit CSRoleRevoked(account);
+	}
+
+	function isCSOn(address account, uint256 clubId) external view returns (bool) {
+		return hasRole(CS_ROLE, account) && clubIdToCs[clubId] == address(account);
 	}
 
 	function isAdminOrModerator(address account) external view returns (bool) {

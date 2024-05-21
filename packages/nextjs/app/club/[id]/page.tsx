@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Proposals } from "~~/components/club/ClubComponent";
+import { Proposals } from "./_components/Proposals";
 
 type PageProps = {
   params: { id: number };

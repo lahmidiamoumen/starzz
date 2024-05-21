@@ -12,6 +12,8 @@ interface IRoles {
     function isStaff(address account) external view returns (bool);
 
     function isCS(address account) external view returns (bool);
+    
+    function isCSOn(address account, uint256 clubId) external view returns (bool);
 
     function isModerator(address account) external view returns (bool);
 
