@@ -10,7 +10,7 @@ export const ClubCard = ({ id }: { id: number }) => {
 
   if (isLoading || (isSuccess && !club)) {
     return (
-      <div className="mt-14">
+      <div className="mt-14 flex flex-col items-center">
         <span className="loading loading-spinner loading-lg"></span>
       </div>
     );
