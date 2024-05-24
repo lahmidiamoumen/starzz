@@ -8,27 +8,23 @@ import { useRole } from "~~/hooks/context/use-context-role";
 import { useGetClub } from "~~/hooks/services/use-get-club";
 
 export const ClubCard = ({ id }: { id: number }) => {
-  const { contractName, payload: club, isLoading, isSuccess } = useGetClub({ id });
+  const { payload: club, isLoading, isSuccess } = useGetClub({ id });
 
   const { role } = useRole();
 
-  if (isLoading || (isSuccess && !club)) {
+  if (isLoading || (isSuccess && !club) || club === null) {
     return (
       <div className="flex items-center space-x-4">
         <Skeleton className="h-12 w-12" />
         <div className="space-y-2">
           <Skeleton className="h-4 w-[250px]" />
-          <Skeleton className="h-4 w-[200px]" />
-          <Skeleton className="h-4 w-[250px]" />
-          <Skeleton className="h-4 w-[200px]" />
+          <Skeleton className="h-4 w-[120px]" />
+          <Skeleton className="h-4 w-[230px]" />
         </div>
       </div>
     );
   }
 
-  if (club === null) {
-    return <p className="text-3xl mt-14">{`No record found by the name of "${contractName}"!`}</p>;
-  }
   const joinedOn = Number(club.joinedOn) > 0 ? new Date(Number(club.joinedOn) * 1000).toLocaleString() : "N/A";
   const requestedOn =
     Number(club.membershipRequestedOn) > 0

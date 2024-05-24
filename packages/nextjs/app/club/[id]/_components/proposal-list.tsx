@@ -5,20 +5,12 @@ import { Map } from "~~/components/core/map";
 import { Skeleton } from "~~/components/core/skeleton";
 import { Address } from "~~/components/scaffold-eth";
 import { useGetProposals } from "~~/hooks/services/use-get-proposals";
-import { ProposalPresnter, VotingStatus } from "~~/types/proposal";
+import { ProposalPresnter, ProposalStatus, VotingStatus } from "~~/types/proposal";
 import { clsx as cn } from "~~/utils/scaffold-eth/clsx";
 
 interface ProposalsListProps {
   clubId: number;
 }
-
-enum ProposalStatus {
-  Pending = 0,
-  Active = 1,
-  Passed = 2,
-  Rejected = 3,
-}
-
 export function ProposalsList({ clubId }: ProposalsListProps) {
   const {
     deployedContractLoading,
@@ -35,9 +27,8 @@ export function ProposalsList({ clubId }: ProposalsListProps) {
   if (deployedContractLoading) {
     return (
       <div className="text-center mt-5 flex flex-col gap-3">
-        <Skeleton className="h-[140px] w-full rounded-xl" />
-        <Skeleton className="h-[140px] w-full rounded-xl" />
-        <Skeleton className="h-[140px] w-full rounded-xl" />
+        <Skeleton className="h-[90px] w-full rounded-xl" />
+        <Skeleton className="h-[90px] w-full rounded-xl" />
       </div>
     );
   }

@@ -18,10 +18,11 @@ export const GrantCsRoles = (props: Props) => {
   const [clubId, setClubId] = useState<string>("");
 
   React.useEffect(() => {
-    if (selectedClub) {
+    if (selectedClub !== null) {
       setClubId(selectedClub.toString());
     }
   }, [selectedClub]);
+
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

@@ -1,13 +1,14 @@
 "use client";
 
 import * as React from "react";
+import CastingVote from "./_components/casting-vote";
+import { VotingSetup } from "./_components/voting-time-component";
 import { BackButton } from "~~/app/blockexplorer/_components";
-import { Button } from "~~/components/core/button";
 import { Card, CardContent, CardTitle } from "~~/components/core/card";
 import { Map } from "~~/components/core/map";
 import { Address } from "~~/components/scaffold-eth";
 import { useGetProposal } from "~~/hooks/services/use-get-proposal";
-import { ChoiceRecord } from "~~/types/proposal";
+import { ChoiceRecord, ProposalStatus, VotingStatus } from "~~/types/proposal";
 
 type PageProps = {
   params: { id: number; proposalId: number };
@@ -24,8 +25,6 @@ const ShowProposal = ({ params }: PageProps) => {
     payload: proposal,
     isSuccess,
   } = useGetProposal({ proposalId, clubId });
-
-  const [selectedChoice, setSelectedChoice] = React.useState<number | null>(null);
 
   if (isLoadingData || (isSuccess && !proposal)) {
     return (
@@ -49,51 +48,21 @@ const ShowProposal = ({ params }: PageProps) => {
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="col-span-1 lg:col-span-2 flex flex-col gap-6">
           <div className="z-10 gap-2 flex flex-col">
-            <Card>
-              <CardContent>
-                <h1 className="font-bold text-3xl my-4 lg:block">{proposal.title}</h1>
-                <Address address={proposal.creator} />
-                <p className="ml-2 mt-4 block mb-2 text-gray-900 dark:text-white">{proposal.description}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent>
-                <h3 className="font-bold text-2xl mb-4 lg:block">Cast your vote</h3>
-                <div className="form-control">
-                  <Map<ChoiceRecord>
-                    items={proposal.choices.slice()}
-                    renderItem={(choice, index) => (
-                      <label
-                        key={index}
-                        className="label cursor-pointer border border-base-300 rounded-xl p-2 px-4 my-1"
-                      >
-                        <span className="label-text">{choice.description}</span>
-                        <input
-                          type="checkbox"
-                          checked={index === selectedChoice}
-                          onChange={() => setSelectedChoice(index)}
-                          className="checkbox checkbox-primary"
-                        />
-                      </label>
-                    )}
-                  />
-                </div>
-                <div className="flex items-end">
-                  {/* <Label htmlFor="mute" className="flex items-center gap-2 text-xs font-normal">
-                    <Switch id="mute" aria-label="Mute thread" /> Mute this thread
-                  </Label> */}
-                  <Button
-                    disabled={selectedChoice === null}
-                    onClick={e => e.preventDefault()}
-                    size="sm"
-                    className="mt-3 btn btn-sm ml-auto"
-                  >
-                    Vote
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <h1 className="font-bold text-3xl my-4 lg:block">{proposal.title}</h1>
+            {VotingStatus[proposal.status as ProposalStatus]}
+            <Address address={proposal.creator} />
+            <span>{proposal.proposalId}</span>
+            <p className="ml-2 mt-4 block mb-2 text-gray-900 dark:text-white">{proposal.description}</p>
           </div>
+          {(proposal.status as ProposalStatus) === ProposalStatus.Pending && (
+            <VotingSetup clubId={clubId} proposalId={proposalId} />
+          )}
+          <CastingVote
+            clubId={clubId}
+            proposalId={proposalId}
+            choices={proposal.choices}
+            status={proposal.status as ProposalStatus}
+          />
         </div>
         <div className="col-span-1 flex flex-col gap-2">
           <Card>
@@ -106,7 +75,7 @@ const ShowProposal = ({ params }: PageProps) => {
                 </div>
                 <div>
                   <b>Start Date</b>
-                  <span className="float-right text-skin-link">Single choice voting</span>
+                  <span className="float-right text-skin-link">Not set</span>
                 </div>
               </div>
             </CardContent>

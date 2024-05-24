@@ -4,11 +4,11 @@ import React, { ReactNode } from "react";
 import { clsx } from "~~/utils/scaffold-eth/clsx";
 
 interface TabProps {
-  defaultTab: number;
+  defaultTab?: number;
   children: ReactNode;
 }
 
-const Tab: React.FC<TabProps> = ({ defaultTab, children }) => {
+const Tab: React.FC<TabProps> = ({ defaultTab = 0, children }) => {
   const [activeTab, setActiveTab] = React.useState(defaultTab);
 
   const handleTabClick = (index: number) => {
