@@ -265,7 +265,7 @@ contract Club is IClub {
 		uint256 pageSize,
 		uint256 length
 	) internal pure returns (uint256, uint256) {
-		if (length == 0) {
+		if (length < 1) {
 			return (0, 0);
 		}
 
@@ -295,7 +295,7 @@ contract Club is IClub {
 			endItemIndex = startItemIndex - pageSize;
 		}
 
-		return (startItemIndex + 1, endItemIndex + 1);
+		return (startItemIndex, endItemIndex);
 	}
 
 	function getPageCursor(
@@ -355,7 +355,7 @@ contract Club is IClub {
 		MemberRecord[] memory pageClubs = new MemberRecord[](itemCount);
 		uint256 j = itemCount - 1;
 		for (uint256 i = endItemIndex; i < startItemIndex; ) {
-			pageClubs[j] = _members.getMemberById(i, clubId);
+			pageClubs[j] = _members.getMemberByIndex(i, clubId);
 			unchecked {
 				++i;
 				--j;
@@ -363,6 +363,19 @@ contract Club is IClub {
 		}
 
 		return pageClubs;
+	}
+
+
+	function getMembershipRequestsCount(
+		uint256 clubId
+	) external view returns (uint256) {
+		return _membershipRequests.current(clubId);
+	}
+
+	function getMembersCount(
+		uint256 clubId
+	) external view returns (uint256) {
+		return _members.current(clubId);
 	}
 
 	function getMembershipRequests(
@@ -384,7 +397,7 @@ contract Club is IClub {
 		MemberRecord[] memory pageClubs = new MemberRecord[](itemCount);
 		uint256 j = itemCount - 1;
 		for (uint256 i = endItemIndex; i < startItemIndex; ) {
-			pageClubs[j] = _membershipRequests.getMemberById(i, clubId);
+			pageClubs[j] = _membershipRequests.getMemberByIndex(i, clubId);
 			unchecked {
 				++i;
 				--j;

@@ -27,6 +27,11 @@ export const useGetMembershipRequests = ({ clubId }: Props) => {
     args: [BigInt(clubId), BigInt(pagination.currentPage), BigInt(pagination.pageSize)],
   });
 
+  const refresh = () => {
+    setMembershipRequests([]);
+    refetch();
+  };
+
   const membersIds = React.useRef<Set<string>>(new Set());
 
   React.useEffect(() => {
@@ -57,7 +62,7 @@ export const useGetMembershipRequests = ({ clubId }: Props) => {
 
   return {
     error,
-    refetch,
+    refetch: refresh,
     deployedContractData,
     deployedContractLoading,
     handleLoadMore,

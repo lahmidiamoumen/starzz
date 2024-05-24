@@ -32,7 +32,7 @@ export const usePostingTime = ({ clubId, proposalId }: Props) => {
     try {
       await writeContractAsync(
         {
-          functionName: "startVoting",
+          functionName: "startVotingTimer",
           args: [BigInt(proposalId), BigInt(clubId), BigInt(duration)],
         },
         {

@@ -4,6 +4,7 @@ import * as React from "react";
 import { Button } from "~~/components/core/button";
 import { Card, CardContent } from "~~/components/core/card";
 import { Map } from "~~/components/core/map";
+import { useHasVoted } from "~~/hooks/services/use-get-has-voted";
 import { usePostingVote } from "~~/hooks/services/use-post-vote";
 import { ChoiceRecord, ProposalStatus } from "~~/types/proposal";
 
@@ -19,6 +20,7 @@ type Props = {
 
 const CastingVote = ({ choices, status, clubId, proposalId }: Props) => {
   const { selectedChoice, setSelectedChoice, handleSubmit } = usePostingVote({ clubId, proposalId });
+  const { payload: hasntVoted } = useHasVoted({ proposalId: proposalId, clubId: clubId });
 
   return (
     <Card className="mt-10">
@@ -31,7 +33,7 @@ const CastingVote = ({ choices, status, clubId, proposalId }: Props) => {
               <label key={index} className="label cursor-pointer border border-base-300 rounded-xl p-2 px-4 my-1">
                 <span className="label-text">{choice.description}</span>
                 <input
-                  disabled={status !== ProposalStatus.Active}
+                  disabled={status !== ProposalStatus.Active || !hasntVoted}
                   type="checkbox"
                   checked={index === selectedChoice}
                   onChange={() => setSelectedChoice(index)}
@@ -41,7 +43,7 @@ const CastingVote = ({ choices, status, clubId, proposalId }: Props) => {
             )}
           />
         </div>
-        {status === ProposalStatus.Active && (
+        {status === ProposalStatus.Active && hasntVoted && (
           <div className="flex items-end">
             <Button
               disabled={selectedChoice === null}
@@ -51,6 +53,11 @@ const CastingVote = ({ choices, status, clubId, proposalId }: Props) => {
             >
               Vote
             </Button>
+          </div>
+        )}
+        {!hasntVoted && (
+          <div className="flex justify-center mt-3 tracking-tight">
+            <span className="tracking-tight">You have already voted.</span>
           </div>
         )}
       </CardContent>

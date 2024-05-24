@@ -7,6 +7,7 @@ import { BackButton } from "~~/app/blockexplorer/_components";
 import { Card, CardContent, CardTitle } from "~~/components/core/card";
 import { Map } from "~~/components/core/map";
 import { Address } from "~~/components/scaffold-eth";
+import { useRole } from "~~/hooks/context/use-context-role";
 import { useGetProposal } from "~~/hooks/services/use-get-proposal";
 import { ChoiceRecord, ProposalStatus, VotingStatus } from "~~/types/proposal";
 
@@ -25,6 +26,8 @@ const ShowProposal = ({ params }: PageProps) => {
     payload: proposal,
     isSuccess,
   } = useGetProposal({ proposalId, clubId });
+
+  const { role } = useRole();
 
   if (isLoadingData || (isSuccess && !proposal)) {
     return (
@@ -54,9 +57,11 @@ const ShowProposal = ({ params }: PageProps) => {
             <span>{proposal.proposalId}</span>
             <p className="ml-2 mt-4 block mb-2 text-gray-900 dark:text-white">{proposal.description}</p>
           </div>
-          {(proposal.status as ProposalStatus) === ProposalStatus.Pending && (
-            <VotingSetup clubId={clubId} proposalId={proposalId} />
-          )}
+          {role &&
+            ["ADMIN", "MODERATOR"].includes(role) &&
+            (proposal.status as ProposalStatus) === ProposalStatus.Pending && (
+              <VotingSetup clubId={clubId} proposalId={proposalId} />
+            )}
           <CastingVote
             clubId={clubId}
             proposalId={proposalId}
@@ -74,8 +79,12 @@ const ShowProposal = ({ params }: PageProps) => {
                   <span className="float-right text-skin-link">Single choice voting</span>
                 </div>
                 <div>
-                  <b>Start Date</b>
-                  <span className="float-right text-skin-link">Not set</span>
+                  <b>Start Time</b>
+                  <span className="float-right text-skin-link">{getDate(proposal.votingStartTime)}</span>
+                </div>
+                <div>
+                  <b>End Time</b>
+                  <span className="float-right text-skin-link">{getDate(proposal.votingEndTime)}</span>
                 </div>
               </div>
             </CardContent>
@@ -112,5 +121,7 @@ const ShowProposal = ({ params }: PageProps) => {
     </div>
   );
 };
+
+const getDate = (date: bigint) => (Number(date) > 0 ? new Date(Number(date) * 1000).toLocaleString() : "N/A");
 
 export default ShowProposal;

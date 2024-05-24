@@ -1,7 +1,15 @@
 "use client";
 
 import React from "react";
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
+import { RevokMembership } from "./revok-membership";
+import { MoreVertical } from "lucide-react";
+import { Button } from "~~/components/core/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~~/components/core/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~~/components/core/table";
 import { Address } from "~~/components/scaffold-eth";
 import { useGetMembers } from "~~/hooks/services/use-get-members";
@@ -38,12 +46,19 @@ const Members = ({ clubId }: PageProps) => {
               </TableCell>
               <TableCell>{getDate(member.ceatedAt)}</TableCell>
               <TableCell className="text-right">
-                <button
-                  onClick={() => console.log("feature is not imlimented yet!")}
-                  className="btn btn-sm font-normal gap-1"
-                >
-                  <EllipsisHorizontalIcon className="h-4 w-4" />
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghostC" size="icon">
+                      <MoreVertical className="h-4 w-4" />
+                      <span className="sr-only">More</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onSelect={(e: { preventDefault: () => any }) => e.preventDefault()}>
+                      <RevokMembership clubId={clubId} address={member.member} />
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
           ))}

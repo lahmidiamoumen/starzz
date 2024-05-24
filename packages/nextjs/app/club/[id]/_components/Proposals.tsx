@@ -25,13 +25,13 @@ const CreateProposal = ({ id }: { id: string }): React.JSX.Element => {
   return (
     <div className="flex flex-col justify-between gap-x-3 gap-y-[10px] sm:flex-row ">
       <div className="w-full pr-0 md:max-w-[340px]">
-        <label className="input input-bordered flex items-center gap-2">
+        <label className="input input-bordered focus-within:outline-none focus-within:border-zinc-700 flex items-center gap-2">
           <input type="text" className="grow focus:outline-none" placeholder="Search" />
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 16 16"
             fill="currentColor"
-            className="w-4 h-4 opacity-70"
+            className="w-5 h-5 opacity-70"
           >
             <path
               fillRule="evenodd"
@@ -42,7 +42,7 @@ const CreateProposal = ({ id }: { id: string }): React.JSX.Element => {
         </label>
       </div>
       <Link href={`/club/${id}/create-proposal`}>
-        <span className="bg-transparent border input-bordered hover:border-transparent rounded-full btn btn-outlin">
+        <span className="bg-transparent input-bordered hover:border-transparent rounded-full btn btn-outlin">
           Create Proposal
         </span>
       </Link>

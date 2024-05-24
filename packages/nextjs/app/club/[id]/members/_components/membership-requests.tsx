@@ -1,7 +1,16 @@
 "use client";
 
 import React from "react";
-import { GrantMembership } from "../grant-membership";
+import { GrantMembership } from "./grant-membership";
+import { RejectMembership } from "./reject-membership";
+import { MoreVertical } from "lucide-react";
+import { Button } from "~~/components/core/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~~/components/core/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~~/components/core/table";
 import { Address } from "~~/components/scaffold-eth";
 import { useGetMembershipRequests } from "~~/hooks/services/use-get-membership-request";
@@ -12,7 +21,7 @@ type PageProps = {
 };
 
 const MembershipRequests = ({ clubId }: PageProps) => {
-  const { payload: members } = useGetMembershipRequests({ clubId });
+  const { payload: members, refetch } = useGetMembershipRequests({ clubId });
 
   return (
     <div className="bg-base-100 space-y-8 p-8">
@@ -38,12 +47,22 @@ const MembershipRequests = ({ clubId }: PageProps) => {
               </TableCell>
               <TableCell>{getDate(member.ceatedAt)}</TableCell>
               <TableCell className="text-right">
-                <button
-                  onClick={() => console.log("feature is not imlimented yet!")}
-                  className="btn btn-sm font-normal gap-1"
-                >
-                  <GrantMembership clubId={clubId} address={member.member} />
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghostC" size="icon">
+                      <MoreVertical className="h-4 w-4" />
+                      <span className="sr-only">More</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>
+                      <GrantMembership onSuccess={refetch} clubId={clubId} address={member.member} />
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <RejectMembership onSuccess={refetch} clubId={clubId} address={member.member} />
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
           ))}

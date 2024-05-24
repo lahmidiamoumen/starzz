@@ -458,6 +458,25 @@ const deployedContracts = {
               name: "clubId",
               type: "uint256",
             },
+          ],
+          name: "getMembersCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
+            },
             {
               internalType: "uint256",
               name: "page",
@@ -487,6 +506,25 @@ const deployedContracts = {
               internalType: "struct MemberRecord[]",
               name: "",
               type: "tuple[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
+            },
+          ],
+          name: "getMembershipRequestsCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
             },
           ],
           stateMutability: "view",
@@ -1013,6 +1051,30 @@ const deployedContracts = {
               name: "clubId",
               type: "uint256",
             },
+          ],
+          name: "hasUserVoted",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "proposalId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "clubId",
+              type: "uint256",
+            },
             {
               internalType: "uint256",
               name: "_votingStartTime",
@@ -1024,7 +1086,7 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
-          name: "startVoting",
+          name: "startVotingSchedule",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
@@ -1047,7 +1109,7 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
-          name: "startVoting",
+          name: "startVotingTimer",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
@@ -1784,22 +1846,15 @@ const deployedContracts = {
         isFan: "contracts/IRoles.sol",
         isModerator: "contracts/IRoles.sol",
         isStaff: "contracts/IRoles.sol",
-        DEFAULT_ADMIN_ROLE:
-          "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
-        getRoleAdmin:
-          "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
-        getRoleMember:
-          "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
-        getRoleMemberCount:
-          "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
+        DEFAULT_ADMIN_ROLE: "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
+        getRoleAdmin: "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
+        getRoleMember: "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
+        getRoleMemberCount: "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
         grantRole: "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
         hasRole: "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
-        renounceRole:
-          "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
-        revokeRole:
-          "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
-        supportsInterface:
-          "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
+        renounceRole: "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
+        revokeRole: "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
+        supportsInterface: "@openzeppelin/contracts/access/AccessControlEnumerable.sol",
       },
     },
   },

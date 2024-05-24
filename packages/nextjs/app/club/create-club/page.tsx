@@ -2,9 +2,12 @@
 
 import * as React from "react";
 import { BackButton } from "~~/app/blockexplorer/_components";
+import { Button } from "~~/components/core/button";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
 const CreateClub = () => {
+  const formRef = React.useRef<HTMLFormElement>(null);
+
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -31,6 +34,9 @@ const CreateClub = () => {
         {
           onBlockConfirmation: txnReceipt => {
             console.log("📦 Transaction blockHash", txnReceipt.blockHash);
+            if (formRef.current) {
+              formRef.current.reset();
+            }
           },
         },
       );
@@ -40,7 +46,7 @@ const CreateClub = () => {
   };
 
   return (
-    <div className="w-full max-w-6xl my-0">
+    <div className="w-full max-w-5xl my-0">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
         <div className="col-span-1 lg:col-span-2 flex flex-col gap-6">
           <div className="z-10">
@@ -48,22 +54,23 @@ const CreateClub = () => {
             <h1 className="font-bold text-3xl my-4 lg:block">Create new club</h1>
             <div className="bg-base-100 rounded-3xl shadow-md shadow-secondary border border-base-300 flex flex-col relative">
               <div className="p-5 divide-y divide-base-300">
-                <form onSubmit={onSubmit}>
+                <form ref={formRef} onSubmit={onSubmit}>
                   <label htmlFor="title" className="ml-2 text-gray-900 dark:text-white">
-                    Title
+                    Club Name
                   </label>
                   <input
                     id="title"
                     name="title"
                     required
                     minLength={6}
+                    placeholder="Give the Clube a Name"
                     type="text"
-                    className="text-gray-900 w-full block my-2 text-sm input input-bordered focus:outline-none"
+                    className="font-medium text-gray-900 w-full block my-2 text-sm input input-bordered focus:outline-none"
                   />
-                  <button type="submit" className="mt-5 btn btn-secondary w-full btn-sm ">
+                  <Button type="submit" className="mt-5 w-full btn-sm ">
                     {isPending && <span className="loading loading-spinner loading-sm"></span>}
                     {!isPending && <span>Submit</span>}
-                  </button>
+                  </Button>
                 </form>
               </div>
             </div>

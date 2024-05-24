@@ -9,7 +9,7 @@ library MemberManager {
 
 	struct MemberData {
 		mapping(uint256 => mapping(uint256 => MemberRecord)) members;
-		mapping(address => mapping(uint256 => uint256)) indexAddress;
+		mapping(address => mapping(uint256 => uint256)) indexByAddress;
 		mapping(uint256 => uint256) indexOf;
 		mapping(uint256 => Counters.Counter) memberIds;
 		mapping(uint256 => uint256[]) keys;
@@ -28,7 +28,7 @@ library MemberManager {
 		uint256 clubId
 	) internal {
 		require(
-			data.indexAddress[user][clubId] == 0,
+			data.indexByAddress[user][clubId] == 0,
 			"Membership request already submitted"
 		);
 		data.memberIds[clubId].increment();
@@ -36,7 +36,7 @@ library MemberManager {
 
     data.indexOf[memberId] = data.keys[clubId].length;
 		data.keys[clubId].push(memberId);
-		data.indexAddress[user][clubId] = memberId;
+		data.indexByAddress[user][clubId] = memberId;
 		data.members[clubId][memberId] = MemberRecord(user, block.timestamp);
 	}
 
@@ -45,13 +45,13 @@ library MemberManager {
 		address user,
 		uint256 clubId
 	) internal {
-		uint256 memberId = data.indexAddress[user][clubId];
+		uint256 memberId = data.indexByAddress[user][clubId];
 		require(
 			memberId != 0,
 			"Membership has not requested"
 		);
 		delete data.members[clubId][memberId];
-		delete data.indexAddress[user][clubId];
+		delete data.indexByAddress[user][clubId];
 
 		uint256 index = data.indexOf[memberId];
 		uint256 lastKey = data.keys[clubId][data.keys[clubId].length - 1];
@@ -68,15 +68,16 @@ library MemberManager {
 		address user,
 		uint256 clubId
 	) internal view returns (MemberRecord memory) {
-		uint256 memberId = data.indexAddress[user][clubId];
+		uint256 memberId = data.indexByAddress[user][clubId];
 		return data.members[clubId][memberId];
 	}
 
-	function getMemberById(
+	function getMemberByIndex(
 		MemberData storage data,
-		uint256 memberId,
+		uint256 index,
 		uint256 clubId
 	) internal view returns (MemberRecord memory) {
+		uint256 memberId = data.keys[clubId][index];
 		return data.members[clubId][memberId];
 	}
 
@@ -85,7 +86,7 @@ library MemberManager {
 		address user,
 		uint256 clubId
 	) internal view returns (bool) {
-		return data.indexAddress[user][clubId] != 0;
+		return data.indexByAddress[user][clubId] != 0;
 	}
 
 	function getMemberID(
@@ -93,7 +94,7 @@ library MemberManager {
 		address user,
 		uint256 clubId
 	) internal view returns (uint256) {
-		return data.indexAddress[user][clubId];
+		return data.indexByAddress[user][clubId];
 	}
 
 }

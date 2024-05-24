@@ -46,7 +46,8 @@ contract Proposal {
 		uint256 votingEndTime;
 	}
 
-	mapping(address => mapping(uint256 => uint256)) private hasVoted;
+	mapping(address => mapping(uint256 => mapping(uint256 => uint256)))
+		private hasVoted;
 	mapping(uint256 => mapping(uint256 => ProposalRecord)) private _proposals;
 	mapping(uint256 => Counters.Counter) private _proposalIds;
 
@@ -133,7 +134,7 @@ contract Proposal {
 		return _proposalIds[clubId].current();
 	}
 
-	function startVoting(
+	function startVotingTimer(
 		uint256 proposalId,
 		uint256 clubId,
 		uint256 duration
@@ -163,7 +164,7 @@ contract Proposal {
 		);
 	}
 
-	function startVoting(
+	function startVotingSchedule(
 		uint256 proposalId,
 		uint256 clubId,
 		uint256 _votingStartTime,
@@ -198,6 +199,13 @@ contract Proposal {
 		);
 	}
 
+	function hasUserVoted(
+		uint256 proposalId,
+		uint256 clubId
+	) external view returns (bool) {
+		return hasVoted[msg.sender][clubId][proposalId] == 0;
+	}
+
 	function vote(
 		uint256 proposalId,
 		uint256 clubId,
@@ -219,14 +227,14 @@ contract Proposal {
 			"Not a member of this club"
 		);
 		require(
-			hasVoted[msg.sender][clubId] == 0,
+			hasVoted[msg.sender][clubId][proposalId] == 0,
 			"Already voted on this proposal"
 		);
 
 		unchecked {
 			proposal.choices[choiceIndex].votes++;
 		}
-		hasVoted[msg.sender][clubId] = block.timestamp;
+		hasVoted[msg.sender][clubId][proposalId] = block.timestamp;
 
 		emit Voted(proposalId, msg.sender, choiceIndex);
 	}
