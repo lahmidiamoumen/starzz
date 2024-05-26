@@ -1,215 +1,384 @@
-// SPDX-License-Identifier: MIT 
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./Roles.sol";
-import "./Club.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "./Roles.sol";
+import "./IRoles.sol";
+import "./Club.sol";
+import "./IClub.sol";
+import "hardhat/console.sol";
 
-contract Proposal is Roles {
-    using Counters for Counters.Counter;
-    enum Status { Pending, Active, Passed, Rejected }
+contract Proposal {
+	using Counters for Counters.Counter;
+	enum Status {
+		Pending,
+		Active,
+		Passed,
+		Rejected
+	}
 
-    Counters.Counter private _proposalIds;
+	address private immutable _roles;
+	address private immutable _clubs;
 
-    struct Choice {
-        string description;
-        uint256 votes;
-    }
+	struct Choice {
+		string description;
+		uint8 votes;
+	}
 
-    struct ProposalDetails {
-        uint256 id;
-        uint256 clubId;
-        address creator;
-        string title;
-        string description;
-        Choice[] choices;
-        Status status;
-        uint256 votingStartTime;
-        uint256 votingEndTime;
-    }
+	struct ProposalRecord {
+		address creator;
+		string title;
+		string description;
+		Choice[] choices;
+		Status status;
+		uint256 votingStartTime;
+		uint256 votingEndTime;
+	}
 
-    mapping(address => mapping (uint256 => bool)) hasVoted;
-    ProposalDetails[] public proposals;
+	struct ProposalPresnter {
+		uint256 proposalId;
+		address creator;
+		string title;
+		string description;
+		Choice[] choices;
+		Status status;
+		uint256 votingStartTime;
+		uint256 votingEndTime;
+	}
 
-    event ProposalCreated(uint256 id, uint256 clubId, address creator);
-    event VotingStarted(uint256 proposalId, uint256 startTime, uint256 endTime);
-    event ProposalEnded(uint256 proposalId, Status status, uint256 endTime);
-    event Voted(uint256 proposalId, address voter, uint256 choiceIndex);
+	mapping(address => mapping(uint256 => mapping(uint256 => uint256)))
+		private hasVoted;
+	mapping(uint256 => mapping(uint256 => ProposalRecord)) private _proposals;
+	mapping(uint256 => Counters.Counter) private _proposalIds;
 
+	event ProposalCreated(uint256 id, uint256 clubId, address creator);
+	event VotingStarted(uint256 proposalId, uint256 startTime, uint256 endTime);
+	event ProposalEnded(uint256 proposalId, Status status, uint256 endTime);
+	event Voted(uint256 proposalId, address voter, uint256 choiceIndex);
 
-    constructor() {
-    } // Inherit Roles constructor
+	constructor(address rolesContract, address clubAddress) {
+		_roles = rolesContract;
+		_clubs = clubAddress;
+	}
 
-    function createProposal(
-        uint256 clubId,
-        string memory _title,
-        string memory _description,
-        string[] memory _choices
-    ) public onlyModerator {
-        require(Club(address(this)).getClubModerator(clubId) == msg.sender, "Not a moderator of this club");
-        require(_choices.length > 0 && _choices.length <= 10, "Invalid number of choices");
+	modifier onlyAdminOrModerator() {
+		require(
+			IRoles(_roles).isAdminOrModerator(_msgSender()),
+			"Roles: caller is not admin or moderator"
+		);
+		_;
+	}
 
-        uint256 proposalIds = _proposalIds.current();
+	function _msgSender() internal view returns (address) {
+		return msg.sender;
+	}
 
-        proposals[proposalIds].id = proposalIds;
-        proposals[proposalIds].clubId = clubId;
-        proposals[proposalIds].creator = msg.sender;
-        proposals[proposalIds].title = _title;
-        proposals[proposalIds].description = _description;
+	function createProposal(
+		uint256 clubId,
+		string memory _title,
+		string memory _description,
+		string[] memory _choicesContent
+	) external onlyAdminOrModerator {
+		require(IClub(_clubs).isValidClubId(clubId), "Invalid club ID");
+		require(
+			_choicesContent.length > 1 && _choicesContent.length <= 10,
+			"Invalid number of choices"
+		);
 
-        // Convert string choices to Choice struct
-        for (uint256 i = 0; i < _choices.length; i++) {
-            proposals[proposalIds].choices.push(Choice(_choices[i], 0));
-        }
+		uint256 proposalId = _proposalIds[clubId].current();
+		_proposalIds[clubId].increment();
 
-        proposals[proposalIds].status = Status.Pending;
+		ProposalRecord storage newProposal = _proposals[clubId][proposalId];
+		newProposal.creator = _msgSender();
+		newProposal.title = _title;
+		newProposal.description = _description;
+		newProposal.status = Status.Pending;
 
-        _proposalIds.increment();
-        emit ProposalCreated(
-            proposals[proposalIds].id,
-            proposals[proposalIds].clubId,
-            proposals[proposalIds].creator);
-    }
+		for (uint256 i; i < _choicesContent.length; ) {
+			newProposal.choices.push(Choice(_choicesContent[i], 0));
+			unchecked {
+				++i;
+			}
+		}
 
-    function isActive(ProposalDetails storage proposal) internal view returns (bool) {
-        return proposal.status == Status.Active &&
-               block.timestamp >= proposal.votingStartTime &&
-               block.timestamp <= proposal.votingEndTime;
-    }
+		emit ProposalCreated(proposalId, clubId, newProposal.creator);
+	}
 
-    function canVote(address _account, uint256 _proposalId) public view returns (bool) {
-        require(_proposalId < proposals.length, "Invalid proposal ID");
-        ProposalDetails storage proposal = proposals[_proposalId];
-        return Club(address(this)).isMember(_account, proposal.clubId) && hasVoted[_account][proposal.clubId] && isActive(proposal);
-    }
+	function isActive(
+		ProposalRecord memory proposal
+	) internal view returns (bool) {
+		return
+			proposal.status == Status.Active &&
+			block.timestamp >= proposal.votingStartTime &&
+			block.timestamp <= proposal.votingEndTime;
+	}
 
-    function getProposalCount() public view returns (uint256) {
-        return proposals.length;
-    }
+	function canVote(
+		address account,
+		uint256 proposalId,
+		uint256 clubId
+	) external view returns (bool) {
+		require(IClub(_clubs).isValidClubId(clubId), "Invalid club ID");
+		require(
+			proposalId <= _proposalIds[clubId].current(),
+			"Invalid proposal ID"
+		);
 
-    function startVoting(uint256 proposalId, uint256 duration) public onlyModerator {
-        require(duration > 500, "Duration must be positive");
-        require(proposalId < proposals.length, "Invalid proposal ID");
-        require(proposals[proposalId].status == Status.Pending, "Proposal not in pending state");
-        proposals[proposalId].status = Status.Active;
-        proposals[proposalId].votingStartTime = block.timestamp;
-        proposals[proposalId].votingEndTime = block.timestamp + duration;
-        emit VotingStarted(proposalId, proposals[proposalId].votingStartTime, proposals[proposalId].votingEndTime);
-    }
+		ProposalRecord memory proposal = _proposals[clubId][proposalId];
+		require(isActive(proposal), "Proposal is not active for voting!");
 
-    function startVoting(
-        uint256 proposalId, 
-        uint256 _votingStartTime,
-        uint256 _votingEndTime
-    ) public onlyModerator {
-        require(proposalId < proposals.length, "Invalid proposal ID");
-        require(proposals[proposalId].status == Status.Pending, "Proposal not in pending state");
-        require(_votingStartTime > block.timestamp, "Start time must be in the future");
-        require(_votingEndTime > _votingStartTime, "End time must be after start time");
-        proposals[proposalId].status = Status.Active;
-        proposals[proposalId].votingStartTime = _votingStartTime;
-        proposals[proposalId].votingEndTime = _votingEndTime;
-        emit VotingStarted(proposalId, proposals[proposalId].votingStartTime, proposals[proposalId].votingEndTime);
-    }
+		return IClub(_clubs).isMember(account, clubId);
+	}
 
-    function vote(uint256 proposalId, uint256 choiceIndex) public {
-        require(proposalId < proposals.length, "Invalid proposal ID");
-        require(proposals[proposalId].status == Status.Active, "Proposal not in voting state");
-        require(block.timestamp < proposals[proposalId].votingEndTime, "Voting has ended");
-        require(Club(address(this)).isMember(msg.sender, proposals[proposalId].clubId), "Not a member of this club");
-        require(!hasVoted[msg.sender][proposals[proposalId].clubId], "Already voted on this proposal");
+	function getProposalCount(uint256 clubId) external view returns (uint256) {
+		return _proposalIds[clubId].current();
+	}
 
-        proposals[proposalId].choices[choiceIndex].votes++;
-        hasVoted[msg.sender][proposals[proposalId].clubId] = true;
+	function startVotingTimer(
+		uint256 proposalId,
+		uint256 clubId,
+		uint256 duration
+	) external onlyAdminOrModerator {
+		require(duration > 500, "Duration must be positive");
+		require(IClub(_clubs).isValidClubId(clubId), "Invalid club ID");
+		require(
+			proposalId <= _proposalIds[clubId].current(),
+			"Invalid proposal ID"
+		);
+		ProposalRecord storage proposal = _proposals[clubId][proposalId];
+		require(
+			proposal.status == Status.Pending,
+			"Proposal not in pending state"
+		);
+		proposal.status = Status.Active;
+		proposal.votingStartTime = block.timestamp;
+		uint256 newDuration;
+		unchecked {
+			newDuration = block.timestamp + duration;
+		}
+		proposal.votingEndTime = newDuration;
+		emit VotingStarted(
+			proposalId,
+			proposal.votingStartTime,
+			proposal.votingEndTime
+		);
+	}
 
-        emit Voted(proposalId, msg.sender, choiceIndex);
-    }
+	function startVotingSchedule(
+		uint256 proposalId,
+		uint256 clubId,
+		uint256 _votingStartTime,
+		uint256 _votingEndTime
+	) external onlyAdminOrModerator {
+		require(IClub(_clubs).isValidClubId(clubId), "Invalid club ID");
+		require(
+			proposalId < _proposalIds[clubId].current(),
+			"Invalid proposal ID"
+		);
+		require(
+			_votingStartTime >= block.timestamp,
+			"Start time must be in the future"
+		);
+		require(
+			_votingEndTime > _votingStartTime,
+			"End time must be after start time"
+		);
+		ProposalRecord storage proposal = _proposals[clubId][proposalId];
+		require(
+			proposal.status == Status.Pending,
+			"Proposal not in pending state"
+		);
+		proposal.status = Status.Active;
+		proposal.votingStartTime = _votingStartTime;
+		proposal.votingEndTime = _votingEndTime;
 
-    function endVoting(uint256 proposalId) public onlyModerator {
-        require(proposalId < proposals.length, "Invalid proposal ID");
-        require(proposals[proposalId].status == Status.Active, "Proposal not in voting state");
-        require(block.timestamp >= proposals[proposalId].votingEndTime, "Voting has not ended yet");
+		emit VotingStarted(
+			proposalId,
+			proposal.votingStartTime,
+			proposal.votingEndTime
+		);
+	}
 
-        uint256 winningChoiceIndex = 0;
-        for (uint256 i = 1; i < proposals[proposalId].choices.length; i++) {
-            if (proposals[proposalId].choices[i].votes > proposals[proposalId].choices[winningChoiceIndex].votes) {
-                winningChoiceIndex = i;
-            }
-        }
+	function hasUserVoted(
+		uint256 proposalId,
+		uint256 clubId
+	) external view returns (bool) {
+		return hasVoted[msg.sender][clubId][proposalId] == 0;
+	}
 
-        proposals[proposalId].status = winningChoiceIndex > 0 ? Status.Passed : Status.Rejected;
+	function vote(
+		uint256 proposalId,
+		uint256 clubId,
+		uint256 choiceIndex
+	) external {
+		require(IClub(_clubs).isValidClubId(clubId), "Invalid club ID");
+		require(
+			proposalId < _proposalIds[clubId].current(),
+			"Invalid proposal ID"
+		);
+		ProposalRecord storage proposal = _proposals[clubId][proposalId];
+		require(
+			proposal.status == Status.Active,
+			"Proposal not in voting state"
+		);
+		require(block.timestamp < proposal.votingEndTime, "Voting has ended");
+		require(
+			IClub(_clubs).isMember(msg.sender, clubId),
+			"Not a member of this club"
+		);
+		require(
+			hasVoted[msg.sender][clubId][proposalId] == 0,
+			"Already voted on this proposal"
+		);
 
-        emit ProposalEnded(proposalId, proposals[proposalId].status, block.timestamp);
-    }
+		unchecked {
+			proposal.choices[choiceIndex].votes++;
+		}
+		hasVoted[msg.sender][clubId][proposalId] = block.timestamp;
 
-    function getProposalsByClub(uint256 clubId) public view returns (ProposalDetails[] memory) {
-        uint256 proposalCount = 0;
-        for (uint256 i = 0; i < proposals.length; i++) {
-            if (proposals[i].clubId == clubId) {
-                proposalCount++;
-            }
-        }
+		emit Voted(proposalId, msg.sender, choiceIndex);
+	}
 
-        ProposalDetails[] memory clubProposals = new ProposalDetails[](proposalCount);
-        uint256 j = 0;
-        for (uint256 i = 0; i < proposals.length; i++) {
-            if (proposals[i].clubId == clubId) {
-                clubProposals[j] = proposals[i];
-                j++;
-            }
-        }
+	function endVoting(
+		uint256 proposalId,
+		uint256 clubId
+	) external onlyAdminOrModerator {
+		require(IClub(_clubs).isValidClubId(clubId), "Invalid club ID");
+		require(
+			proposalId < _proposalIds[clubId].current(),
+			"Invalid proposal ID"
+		);
+		ProposalRecord storage proposal = _proposals[clubId][proposalId];
+		require(
+			proposal.status == Status.Active,
+			"Proposal not in voting state"
+		);
 
-        return clubProposals;
-    }
+		uint256 winningChoiceIndex;
+		for (uint256 i = 1; i < proposal.choices.length; ) {
+			if (
+				proposal.choices[i].votes >
+				proposal.choices[winningChoiceIndex].votes
+			) {
+				winningChoiceIndex = i;
+			}
+			unchecked {
+				++i;
+			}
+		}
 
-    function getProposalsByPage(uint256 pageNumber, uint256 pageSize, uint256 lastProposalId) public view returns (ProposalDetails[] memory) {
-        require(pageNumber >= 0, "Invalid page number (must be non-negative)");
-        require(lastProposalId >= 0, "Invalid Last Proposal Id (must be non-negative)");
-        require(pageSize > 0, "Invalid page size (must be positive)");
+		proposal.status = winningChoiceIndex > 0
+			? Status.Passed
+			: Status.Rejected;
 
-        uint256 startIndex = pageNumber * pageSize;
-        uint256 endIndex = startIndex + pageSize;
+		emit ProposalEnded(proposalId, proposal.status, block.timestamp);
+	}
 
-        if (lastProposalId == 0) {
-            lastProposalId = proposals.length > 0 ? proposals[proposals.length - 1].id : 0;
-        }
+	function getPageCursor(
+		uint256 page,
+		uint256 pageSize,
+		uint256 clubId
+	) internal view returns (uint256, uint256) {
+		uint256 length = _proposalIds[clubId].current();
+		if (length == 0) {
+			return (0, 0);
+		}
 
-        ProposalDetails[] memory pageProposals = new ProposalDetails[](endIndex < proposals.length ? endIndex - startIndex : proposals.length - startIndex);
-        uint256 j = 0;
+		uint256 totalPages = length / pageSize;
+		if (length % pageSize != 0) {
+			unchecked {
+				++totalPages;
+			}
+		}
 
-        for (uint256 i = startIndex; i < endIndex && i < proposals.length; i++) {
-            if (proposals[i].id > lastProposalId) {
-                lastProposalId = proposals[i].id;
-            }
-            pageProposals[j] = proposals[i];
-            j++;
-        }
+		if (page > totalPages) {
+			return (0, 0);
+		}
 
-        return pageProposals;
-    }
+		uint256 startItemIndex;
+		uint256 endItemIndex;
 
-    function getProposalsByModerator(address moderator) public view returns (ProposalDetails[] memory) {
-        uint256 proposalCount = 0;
-        for (uint256 i = 0; i < proposals.length; i++) {
-            if (proposals[i].creator == moderator) {
-                proposalCount++;
-            }
-        }
+		if (((page - 1) * pageSize) < length) {
+			unchecked {
+				startItemIndex = length - ((page - 1) * pageSize);
+			}
+		} else {
+			startItemIndex = length;
+		}
 
-        ProposalDetails[] memory moderatorProposals = new ProposalDetails[](proposalCount);
-        uint256 j = 0;
-        for (uint256 i = 0; i < proposals.length; i++) {
-            if (proposals[i].creator == moderator) {
-                moderatorProposals[j] = proposals[i];
-                j++;
-            }
-        }
+		if (startItemIndex > pageSize) {
+			endItemIndex = startItemIndex - pageSize;
+		}
 
-        return moderatorProposals;
-    }
+		return (startItemIndex, endItemIndex);
+	}
 
-    function getProposalDetails(uint256 proposalId) public view returns (ProposalDetails memory) {
-        require(proposalId < proposals.length, "Invalid proposal ID");
-        return proposals[proposalId];
-    }
+	function getProposals(
+		uint256 clubId,
+		uint256 page,
+		uint256 pageSize
+	) external view returns (ProposalPresnter[] memory) {
+		require(pageSize > 0 && pageSize <= 100, "Invalid page size number!");
+		require(page > 0, "Invalid page number!");
+		require(IClub(_clubs).isValidClubId(clubId), "Invalid club ID");
+		(uint256 startItemIndex, uint256 endItemIndex) = getPageCursor(
+			page,
+			pageSize,
+			clubId
+		);
+
+		uint256 itemCount = startItemIndex - endItemIndex;
+
+		if (itemCount < 1) {
+			return new ProposalPresnter[](0);
+		}
+
+		ProposalPresnter[] memory pageProposals = new ProposalPresnter[](
+			itemCount
+		);
+		uint256 j = itemCount - 1;
+		for (uint256 i = endItemIndex; i < startItemIndex; ) {
+			ProposalRecord memory proposal = _proposals[clubId][i];
+			pageProposals[j] = ProposalPresnter({
+				creator: proposal.creator,
+				title: proposal.title,
+				description: proposal.description,
+				choices: proposal.choices,
+				status: proposal.status,
+				votingStartTime: proposal.votingStartTime,
+				votingEndTime: proposal.votingEndTime,
+				proposalId: i
+			});
+
+			unchecked {
+				++i;
+				--j;
+			}
+		}
+
+		return pageProposals;
+	}
+
+	function getProposalDetails(
+		uint256 proposalId,
+		uint256 clubId
+	) external view returns (ProposalPresnter memory) {
+		require(IClub(_clubs).isValidClubId(clubId), "Invalid club ID");
+		require(
+			proposalId < _proposalIds[clubId].current(),
+			"Invalid proposal ID"
+		);
+		ProposalRecord memory proposal = _proposals[clubId][proposalId];
+		return
+			ProposalPresnter({
+				creator: proposal.creator,
+				title: proposal.title,
+				description: proposal.description,
+				choices: proposal.choices,
+				status: proposal.status,
+				votingStartTime: proposal.votingStartTime,
+				votingEndTime: proposal.votingEndTime,
+				proposalId: proposalId
+			});
+	}
 }
