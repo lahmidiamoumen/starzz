@@ -7218,13 +7218,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns@npm:^3.6.0":
-  version: 3.6.0
-  resolution: "date-fns@npm:3.6.0"
-  checksum: 0daa1e9a436cf99f9f2ae9232b55e11f3dd46132bee10987164f3eebd29f245b2e066d7d7db40782627411ecf18551d8f4c9fcdf2226e48bb66545407d448ab7
-  languageName: node
-  linkType: hard
-
 "death@npm:^1.1.0":
   version: 1.1.0
   resolution: "death@npm:1.1.0"
@@ -15109,7 +15102,6 @@ __metadata:
     "@radix-ui/react-separator": ^1.0.3
     "@radix-ui/react-tooltip": ^1.0.7
     class-variance-authority: ^0.7.0
-    date-fns: ^3.6.0
     husky: ^8.0.1
     lint-staged: ^13.0.3
     lucide-react: ^0.379.0
