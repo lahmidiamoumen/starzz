@@ -42,12 +42,19 @@
     "lint-staged": "^13.0.3"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.4.2",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
+    "@radix-ui/react-label": "^2.0.2",
+    "@radix-ui/react-popover": "^1.0.7",
     "@radix-ui/react-scroll-area": "^1.0.5",
     "@radix-ui/react-separator": "^1.0.3",
+    "@radix-ui/react-tooltip": "^1.0.7",
     "class-variance-authority": "^0.7.0",
-    "lucide-react": "^0.379.0"
+    "lucide-react": "^0.379.0",
+    "react-day-picker": "^8.10.1",
+    "react-hook-form": "^7.51.5",
+    "zod": "^3.23.8"
   }
 }
