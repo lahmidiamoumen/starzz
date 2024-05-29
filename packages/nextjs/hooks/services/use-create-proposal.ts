@@ -67,8 +67,7 @@ export const useCreateProposal = ({ clubId }: Props) => {
           args: [BigInt(clubId), title, description, options.map(op => op.text)],
         },
         {
-          onBlockConfirmation: txnReceipt => {
-            console.log("📦 Transaction blockHash", txnReceipt.blockHash);
+          onSuccess: () => {
             if (formRef.current) {
               formRef.current.reset();
             }
@@ -76,6 +75,9 @@ export const useCreateProposal = ({ clubId }: Props) => {
               { id: 1, text: "" },
               { id: 2, text: "" },
             ]);
+          },
+          onBlockConfirmation: txnReceipt => {
+            console.log("📦 Transaction blockHash", txnReceipt.blockHash);
           },
         },
       );

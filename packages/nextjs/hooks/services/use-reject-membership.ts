@@ -23,10 +23,13 @@ export const useRejectMembership = ({ address, clubId, onSuccess }: Props) => {
           args: [address, BigInt(clubId)],
         },
         {
-          onBlockConfirmation: txnReceipt => {
-            console.log("📦 Transaction blockHash", txnReceipt.blockHash);
+          onSuccess: () => {
+            setStatusMessage("Transaction is being mined!");
             setIsOpen(false);
             onSuccess();
+          },
+          onBlockConfirmation: txnReceipt => {
+            console.log("📦 Transaction blockHash", txnReceipt.blockHash);
             setStatusMessage("Membership Rejected!");
           },
         },

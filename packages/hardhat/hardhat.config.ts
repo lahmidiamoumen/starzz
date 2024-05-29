@@ -19,6 +19,8 @@ const deployerPrivateKey =
 // If not set, it uses ours Etherscan default API key.
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY || "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW";
 
+const isDevelopment = (process.env.DEVELOPMENT ?? "true") === "true";
+
 const config: HardhatUserConfig = {
   solidity: {
     compilers: [
@@ -34,7 +36,7 @@ const config: HardhatUserConfig = {
       },
     ],
   },
-  defaultNetwork: "sepolia",
+  defaultNetwork: isDevelopment ? "localhost" : "sepolia",
   namedAccounts: {
     deployer: {
       // By default, it will take the first Hardhat account as the deployer
@@ -55,7 +57,13 @@ const config: HardhatUserConfig = {
       accounts: [deployerPrivateKey],
     },
     sepolia: {
+      chainId: 11155111,
       url: `https://sepolia.infura.io/v3/d9c83be4262d4a209bdb2c1249aaab40`,
+      accounts: ["b9bccd5538f84669f0bcc0e8218b2b8bff65aefe5bfbd75e3e53f21eae7af400"],
+    },
+    sepoliaAlchemy: {
+      chainId: 11155111,
+      url: `https://eth-sepolia.g.alchemy.com/v2/ZiKdciSSQkNrOWF7kjDBqntZlsvVteAp`,
       accounts: ["b9bccd5538f84669f0bcc0e8218b2b8bff65aefe5bfbd75e3e53f21eae7af400"],
     },
     arbitrum: {

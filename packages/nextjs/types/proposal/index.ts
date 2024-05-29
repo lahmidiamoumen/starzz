@@ -18,15 +18,17 @@ export interface ChoiceRecord {
 }
 
 export enum ProposalStatus {
-  Pending = 0,
-  Active = 1,
-  Passed = 2,
-  Rejected = 3,
+  Scheduled = 0,
+  Pending = 1,
+  Active = 2,
+  Passed = 3,
+  Rejected = 4,
 }
 
 export const VotingStatus = {
-  0: "Pending",
-  1: "Active",
-  2: "Passed",
-  3: "Rejected",
+  0: "Scheduled",
+  1: "Pending",
+  2: "Active",
+  3: "Passed",
+  4: "Rejected",
 };

@@ -34,6 +34,9 @@ export const usePostingVote = ({ clubId, proposalId }: Props) => {
           args: [BigInt(proposalId), BigInt(clubId), BigInt(selectedChoice)],
         },
         {
+          onSuccess: () => {
+            setStatusMessage("Transaction is being mined!");
+          },
           onBlockConfirmation: txnReceipt => {
             console.log("📦 Transaction blockHash", txnReceipt.blockHash);
             setStatusMessage("Transaction successful!");

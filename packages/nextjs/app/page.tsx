@@ -9,11 +9,11 @@ import { Search } from "~~/components/core/search";
 import { Separator } from "~~/components/core/separator";
 import { Skeleton } from "~~/components/core/skeleton";
 import ClubsList from "~~/components/home/read-clubs";
-import { Address } from "~~/components/scaffold-eth";
+import { Address, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useRole } from "~~/hooks/context/use-context-role";
 
 const Home: NextPage = () => {
-  const { address: connectedAddress } = useAccount();
+  const { address: connectedAddress, isDisconnected } = useAccount();
   const { role, isLoading } = useRole();
 
   if (isLoading) {
@@ -29,10 +29,17 @@ const Home: NextPage = () => {
               <span className="block text-2xl mb-2">Welcome to</span>
               <span className="block text-4xl font-bold">BrightGov x Starzz</span>
             </h1>
-            <div className="flex justify-center items-center space-x-2">
-              <p className="my-2 font-medium">Connected Address:</p>
-              <Address address={connectedAddress} />
-            </div>
+            {!isDisconnected && (
+              <div className="flex justify-center items-center space-x-2">
+                <p className="my-2 font-medium">Connected Address:</p>
+                <Address address={connectedAddress} />
+              </div>
+            )}
+            {isDisconnected && (
+              <div className="w-full text-center pt-5">
+                <RainbowKitCustomConnectButton />
+              </div>
+            )}
           </CardContent>
         </Card>
 
