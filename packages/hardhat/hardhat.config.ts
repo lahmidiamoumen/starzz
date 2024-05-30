@@ -19,7 +19,7 @@ const deployerPrivateKey =
 // If not set, it uses ours Etherscan default API key.
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY || "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW";
 
-const isDevelopment = (process.env.DEVELOPMENT ?? "true") === "true";
+const isDevelopment = false; //(process.env.DEVELOPMENT ?? "true") === "true";
 
 const config: HardhatUserConfig = {
   solidity: {

@@ -8,7 +8,7 @@ export type ScaffoldConfig = {
   onlyLocalBurnerWallet: boolean;
 };
 
-const isDevelopment = (process.env.DEVELOPMENT ?? "true") === "true";
+const isDevelopment = false; //(process.env.DEVELOPMENT ?? "true") === "true";
 
 const scaffoldConfig = {
   // The networks on which your DApp is live
