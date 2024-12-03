@@ -8,7 +8,7 @@
 
 ⚙️ Built using NextJS, RainbowKit, Hardhat, Wagmi, Viem, and Typescript.
 
-![Screenshot](/assets/55535804/screen)
+![Screenshot](/assets/screen)
 
 ## Requirements
 
