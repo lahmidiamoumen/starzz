@@ -1,4 +1,4 @@
-# 🏗 Starzz
+# Starzz
 
 <h4 align="center">
   <a href="https://starzz.brightgov.tech/">Website</a>
@@ -8,7 +8,7 @@
 
 ⚙️ Built using NextJS, RainbowKit, Hardhat, Wagmi, Viem, and Typescript.
 
-![Screenshot](/assets/55535804)
+![Screenshot](/assets/55535804/screen.png)
 
 ## Requirements
 
