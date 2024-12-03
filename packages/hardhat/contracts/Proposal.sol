@@ -11,6 +11,7 @@ import "hardhat/console.sol";
 contract Proposal {
 	using Counters for Counters.Counter;
 	enum Status {
+		Scheduled,
 		Pending,
 		Active,
 		Passed,
@@ -110,7 +111,7 @@ contract Proposal {
 		return
 			proposal.status == Status.Active &&
 			block.timestamp >= proposal.votingStartTime &&
-			block.timestamp <= proposal.votingEndTime;
+			block.timestamp < proposal.votingEndTime;
 	}
 
 	function canVote(
@@ -217,11 +218,7 @@ contract Proposal {
 			"Invalid proposal ID"
 		);
 		ProposalRecord storage proposal = _proposals[clubId][proposalId];
-		require(
-			proposal.status == Status.Active,
-			"Proposal not in voting state"
-		);
-		require(block.timestamp < proposal.votingEndTime, "Voting has ended");
+		require(isActive(proposal), "Proposal is not active for voting!");
 		require(
 			IClub(_clubs).isMember(msg.sender, clubId),
 			"Not a member of this club"
@@ -339,12 +336,29 @@ contract Proposal {
 		uint256 j = itemCount - 1;
 		for (uint256 i = endItemIndex; i < startItemIndex; ) {
 			ProposalRecord memory proposal = _proposals[clubId][i];
+			Status status = proposal.status;
+
+			if (block.timestamp < proposal.votingStartTime) {
+				status = Status.Scheduled;
+			} else if (
+				block.timestamp >= proposal.votingStartTime &&
+				block.timestamp < proposal.votingEndTime &&
+				status == Status.Pending
+			) {
+				status = Status.Active;
+			} else if (
+				block.timestamp > proposal.votingEndTime &&
+				status == Status.Active
+			) {
+				status = Status.Passed;
+			}
+
 			pageProposals[j] = ProposalPresnter({
 				creator: proposal.creator,
 				title: proposal.title,
 				description: proposal.description,
 				choices: proposal.choices,
-				status: proposal.status,
+				status: status,
 				votingStartTime: proposal.votingStartTime,
 				votingEndTime: proposal.votingEndTime,
 				proposalId: i
@@ -369,13 +383,29 @@ contract Proposal {
 			"Invalid proposal ID"
 		);
 		ProposalRecord memory proposal = _proposals[clubId][proposalId];
+		Status status = proposal.status;
+
+		if (block.timestamp < proposal.votingStartTime) {
+			status = Status.Scheduled;
+		} else if (
+			block.timestamp >= proposal.votingStartTime &&
+			block.timestamp < proposal.votingEndTime &&
+			status == Status.Pending
+		) {
+			status = Status.Active;
+		} else if (
+			block.timestamp > proposal.votingEndTime && status == Status.Active
+		) {
+			status = Status.Passed;
+		}
+
 		return
 			ProposalPresnter({
 				creator: proposal.creator,
 				title: proposal.title,
 				description: proposal.description,
 				choices: proposal.choices,
-				status: proposal.status,
+				status: status,
 				votingStartTime: proposal.votingStartTime,
 				votingEndTime: proposal.votingEndTime,
 				proposalId: proposalId

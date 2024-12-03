@@ -20,7 +20,7 @@ export function VotingSetup({ clubId, proposalId }: Props) {
               <Timer clubId={clubId} proposalId={proposalId} />
             </TabView>
             <TabView label="Schedule">
-              <DateTimePickerForm />
+              <DateTimePickerForm clubId={clubId} proposalId={proposalId} />
             </TabView>
           </Tab>
         </div>

@@ -6,6 +6,7 @@ import { VotingSetup } from "./_components/voting-time-component";
 import { BackButton } from "~~/app/blockexplorer/_components";
 import { Card, CardContent, CardTitle } from "~~/components/core/card";
 import { Map } from "~~/components/core/map";
+import { Skeleton } from "~~/components/core/skeleton";
 import { Address } from "~~/components/scaffold-eth";
 import { useRole } from "~~/hooks/context/use-context-role";
 import { useGetProposal } from "~~/hooks/services/use-get-proposal";
@@ -29,19 +30,34 @@ const ShowProposal = ({ params }: PageProps) => {
 
   const { role } = useRole();
 
-  if (isLoadingData || (isSuccess && !proposal)) {
+  const totalVotes = React.useMemo(() => {
+    if (!proposal || !proposal.choices) {
+      return 0;
+    }
+    return proposal.choices.reduce((total, choice) => total + choice.votes, 0);
+  }, [proposal]);
+  if (isLoadingData || (isSuccess && !proposal) || !deployedContractData || proposal === null) {
     return (
-      <div className="mt-14">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div className="w-full max-w-6xl text-center mt-5 flex flex-col gap-3">
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="col-span-1 lg:col-span-2 flex flex-col gap-6">
+            <Skeleton className="h-[90px] w-full rounded-xl" />
+            <Skeleton className="h-[20px] w-[200px] rounded-xl" />
+            <Skeleton className="h-[20px] w-[200px] rounded-xl" />
+            <Skeleton className="h-[50px] w-full rounded-xl" />
+            <Skeleton className="h-[30px] w-[200px] rounded-xl" />
+          </div>
+          <div className="col-span-1 flex flex-col gap-2">
+            <Skeleton className="h-[50px] w-full rounded-xl" />
+            <Skeleton className="h-[20px] w-[200px] rounded-xl" />
+            <Skeleton className="h-[20px] w-[100px] rounded-xl" />
+          </div>
+        </div>
       </div>
     );
   }
 
-  if (!deployedContractData) {
-    return <p className="text-3xl mt-14">{`No contract found by the name of "${contractName}"!`}</p>;
-  }
-
-  if (proposal === null) {
+  if (isSuccess && proposal === null) {
     return <p className="text-3xl mt-14">{`No record found by the name of "${contractName}"!`}</p>;
   }
 
@@ -102,13 +118,16 @@ const ShowProposal = ({ params }: PageProps) => {
                           <span className="mr-1 truncate">{choice.description}</span>
                         </div>
                         <div className="flex justify-end">
-                          <span>{26}%</span>
+                          <span>{formatPercentage(choice.votes, totalVotes)}</span>
                         </div>
                       </div>
                       <progress
                         className="progress relative flex h-2 overflow-hidden rounded-full"
-                        value={40}
+                        value={totalVotes > 0 ? (choice.votes / totalVotes) * 100 : 0}
                         max="100"
+                        aria-valuenow={totalVotes > 0 ? (choice.votes / totalVotes) * 100 : 0}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
                       ></progress>
                     </div>
                   )}
@@ -123,5 +142,11 @@ const ShowProposal = ({ params }: PageProps) => {
 };
 
 const getDate = (date: bigint) => (Number(date) > 0 ? new Date(Number(date) * 1000).toLocaleString() : "N/A");
+
+const formatPercentage = (votes: number, totalVotes: number): string => {
+  if (totalVotes === 0) return "0%";
+  const percentage = (votes / totalVotes) * 100;
+  return Number.isInteger(percentage) ? `${percentage}%` : `${percentage.toFixed(2)}%`;
+};
 
 export default ShowProposal;

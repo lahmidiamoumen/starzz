@@ -666,7 +666,7 @@ const deployedContracts = {
       },
     },
     Proposal: {
-      address: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+      address: "0x9E545E3C0baAB3E08CdfD552C960A1050f373042",
       abi: [
         {
           inputs: [
@@ -1860,7 +1860,7 @@ const deployedContracts = {
   },
   11155111: {
     Club: {
-      address: "0xd201b4fADD5197F077F851307D53D1977D4994ed",
+      address: "0x344A40a76Df40583e649592F75ED0232a8379af4",
       abi: [
         {
           inputs: [
@@ -2519,7 +2519,7 @@ const deployedContracts = {
       },
     },
     Proposal: {
-      address: "0x1F44349F31202f8AD4Cd9Fe1071Bd523453Ccd5F",
+      address: "0x4E193d8de2e794b244B85Df6c5d2434A2f42B2EE",
       abi: [
         {
           inputs: [
@@ -2994,7 +2994,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     Roles: {
-      address: "0x014eEd1680F5dbC179D340B2904c0bf855E3D9F2",
+      address: "0xB690155751f50E6edbA8AEAE0b10C3350487cFEf",
       abi: [
         {
           inputs: [

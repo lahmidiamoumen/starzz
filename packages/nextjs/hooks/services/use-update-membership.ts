@@ -23,6 +23,11 @@ export const useUpdateMembership = ({ address, clubId, onSuccess }: Props) => {
           args: [address, BigInt(clubId)],
         },
         {
+          onSuccess: () => {
+            setStatusMessage("Transaction is being mined!");
+            setIsOpen(false);
+            onSuccess();
+          },
           onBlockConfirmation: txnReceipt => {
             console.log("📦 Transaction blockHash", txnReceipt.blockHash);
             setIsOpen(false);

@@ -1,37 +1,27 @@
 "use client";
 
 import { TimePickerDemo } from "./time-picker-demo";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Button } from "~~/components/core/button";
 import { Calendar } from "~~/components/core/calendar";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "~~/components/core/form";
 import { Popover, PopoverContent, PopoverTrigger } from "~~/components/core/popover";
+import { usePostSchedule } from "~~/hooks/services/use-post-schedule";
 import { clsx as cn } from "~~/utils/scaffold-eth/clsx";
 
-const formSchema = z.object({
-  startingDate: z.date(),
-  endingDate: z.date(),
-});
+interface Props {
+  clubId: number;
+  proposalId: number;
+}
 
-type FormSchemaType = z.infer<typeof formSchema>;
-
-export function DateTimePickerForm() {
-  const form = useForm<FormSchemaType>({
-    resolver: zodResolver(formSchema),
-  });
-
-  function onSubmit(data: FormSchemaType) {
-    console.log(data.startingDate);
-    console.log(data.endingDate);
-  }
+export function DateTimePickerForm(props: Props) {
+  const { clubId, proposalId } = props;
+  const { form, handleSubmit } = usePostSchedule({ clubId, proposalId });
 
   return (
     <Form {...form}>
-      <form className="mt-10 gap-4 flex flex-col items-end" onSubmit={form.handleSubmit(onSubmit)}>
+      <form className="mt-10 gap-4 flex flex-col items-end" onSubmit={form.handleSubmit(handleSubmit)}>
         <div className="grid grid-cols-1 md:grid-cols-2 w-full gap-5">
           <FormField
             control={form.control}

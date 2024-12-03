@@ -36,6 +36,9 @@ export const usePostingTime = ({ clubId, proposalId }: Props) => {
           args: [BigInt(proposalId), BigInt(clubId), BigInt(duration)],
         },
         {
+          onSuccess: () => {
+            setStatusMessage("Transaction is being mined!");
+          },
           onBlockConfirmation: txnReceipt => {
             console.log("📦 Transaction blockHash", txnReceipt.blockHash);
             setStatusMessage("Transaction successful!");

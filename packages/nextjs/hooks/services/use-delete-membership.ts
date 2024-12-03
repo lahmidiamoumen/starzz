@@ -23,12 +23,15 @@ export const useDeleteMembership = ({ address, clubId, onSuccess }: Props) => {
           args: [address, BigInt(clubId)],
         },
         {
-          onBlockConfirmation: txnReceipt => {
-            console.log("📦 Transaction blockHash", txnReceipt.blockHash);
+          onSuccess: () => {
+            setStatusMessage("Transaction is being mined!");
             setIsOpen(false);
             if (onSuccess) {
               onSuccess();
             }
+          },
+          onBlockConfirmation: txnReceipt => {
+            console.log("📦 Transaction blockHash", txnReceipt.blockHash);
             setStatusMessage("Membership Revoked!");
           },
         },
